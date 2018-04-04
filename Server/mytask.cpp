@@ -36,12 +36,10 @@ void MyTask::run()
                         FROM `Parking`.`Active`;\
                         WHERE `Active`.`rf_id`=%1").arg(bWiegand));
     if(!query.exec()){
-        qDebug()<<query.lastError().databaseText();
+        qDebug()<<query.lastError().driverText();
         return;
     }
     query.next();
-
-    // time consumer
 
     ////ENTER
     if(bBareerMode){
@@ -63,33 +61,40 @@ void MyTask::run()
         query.bindValue(":b_img", cFileName);
 
         if(!query.exec()){
-            qDebug()<<query.lastError().databaseText();
+            qDebug()<<query.lastError().driverText();
             return;
         }
 
         emit Result(Replies::WIEGAND_REGISTERED);
-        return;
     }
 
     /////EXIT
+    else {
     if(!query.isValid()){
         emit Result(Replies::WIEGAND_NOT_REGISTERED);
         return;
     }
-    query.prepare("CALL `Parking`.`MoveToHistory`(:b_rf_id, :b_out_number);");
-    query.bindValue(":b_rf_id",bWiegand);
-    query.bindValue(":b_out_number", bBareerNo);
-
-    if(!query.exec()){
-        qDebug()<<query.lastError().databaseText();
+    if(!snapshot()){
+        emit Result(Replies::SNAPSHOT_FAIL);
         return;
     }
+    query.prepare("CALL `Parking`.`MoveToHistory`(:b_rf_id, :b_out_number, :b_img_out);");
+    query.bindValue(":b_rf_id",bWiegand);
+    query.bindValue(":b_out_number", bBareerNo);
+    query.bindValue(":b_img_out", cFileName);
+
+    if(!query.exec()){
+        qDebug()<<query.lastError().driverText();
+        return;
+    }
+
     query.next();
     emit Result(Replies::WIEGAND_DEACTIVATED,
                 query.value("in_time").toDateTime(),
                 query.value("in_number").toUInt(),
                 query.value("out_time").toDateTime(),
                 query.value("price").toDouble());
+    }
 }
 
 bool MyTask::snapshot()
