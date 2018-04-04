@@ -1,6 +1,6 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
-    RpiClient \
+#    RpiClient \
     Client \
 #    Server

@@ -212,9 +212,10 @@ void MainWindow::readSocket()
         ui->exit_number_label->setText(QString::number(bSettings->modeSettings().bareerNumber));
         ui->price_label->setText(QString("%1").arg(price));
 
-        QString temp = QString("%1 Часов %2 Минут");
-
-        ui->duration_label->setText(temp);
+        int diff = in_time.time().secsTo(out_time.time());
+        ui->duration_label->setText(QTime(diff/(3600),
+                                          (diff%(diff/(3600)))/60,
+                                          diff%((diff%(diff/(3600)))/60)).toString());
 
         showStatusMessage("<font color='green'>WIEGAND ID is deactivated");
 
@@ -271,7 +272,7 @@ void MainWindow::initActionsConnections()
     connect(ui->actionConnect,&QAction::triggered, this, &MainWindow::makeConnection);
     connect(ui->actionDisconnect, &QAction::triggered, this, &MainWindow::makeDisconnection);
     connect(ui->actionPrint, &QAction::triggered, this, &MainWindow::print);
-    connect(ui->actioPrinterSettings, &QAction::triggered, bPrintDialog->exec());
+    connect(ui->actionPrinterSettings, &QAction::triggered, bPrintDialog->exec());
 }
 
 void MainWindow::readSettings()
