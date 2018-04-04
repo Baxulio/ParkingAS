@@ -12,6 +12,8 @@ class MainWindow;
 class QTcpSocket;
 class SettingsDialog;
 class QLabel;
+class QPrintDialog;
+class QPrinter;
 
 class MainWindow : public QMainWindow
 {
@@ -22,6 +24,8 @@ private:
     QLabel *label;
     Wiegand *bWiegand;
     QTcpSocket *bsocket;
+    QPrintDialog *bPrintDialog;
+    QPrinter bPrinter;
 
 public:
     explicit MainWindow(QWidget *parent = 0);
@@ -41,8 +45,7 @@ private slots:
     void readSocket();
     void displaySocketError(QAbstractSocket::SocketError socketError);
 
-    void on_print_button_clicked();
-
+    void print();
 private:
     void setUpServer();
     void initActionsConnections();

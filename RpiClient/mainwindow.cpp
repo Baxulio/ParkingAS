@@ -15,13 +15,18 @@
 #include <QDateTime>
 #include "../core.h"
 
+#include <QPrinter>
+#include <QPrintDialog>
+#include <QPainter>
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     bSettings(new SettingsDialog),
-    bWiegand(new Wiegand),
+    bWiegand(new Wiegand(this)),
     bsocket(new QTcpSocket(this)),
-    label(new QLabel)
+    label(new QLabel(this)),
+    bPrintDialog(new QPrintDialog(bPrinter,this))
 {
     ui->setupUi(this);
     ui->statusBar->addPermanentWidget(label);
@@ -37,10 +42,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    delete label;
     delete bSettings;
-    delete bWiegand;
-    delete bsocket;
     delete ui;
 }
 
@@ -152,28 +154,23 @@ void MainWindow::readSocket()
         showStatusMessage("<font color='green'>Successfully Set UP");
         return;
     }
+
         //ENTER mode
     case Replies::WIEGAND_ALREADY_REGISTERED:{
         QDateTime in_time;
         quint8 in_number;
         in>>in_time>>in_number;
+
         if(!in.commitTransaction())
             return;
+
         ui->enter_time_label->setText(in_time.toString());
         ui->enter_number_label->setText(QString::number(in_number));
-        if(!in.commitTransaction())
-            return;
+
         showStatusMessage("<font color='green'>WIEGAND ID is already registered!");
-        QMessageBox msg;
-        int n = msg.question(this,
-                             "Bareer",
-                             "Wiegand ID is already registered! Do you want to open Bareer?",
-                             QMessageBox::Ok,
-                             QMessageBox::Cancel);
-        msg.exec();
-        if(n==QMessageBox::AcceptRole)
-            if(bWiegand->openBareer())
-                showStatusMessage("<font color='green'>Bareer opened!");
+
+        if(bWiegand->openBareer())
+            showStatusMessage("<font color='green'>Bareer opened!");
 
         return;
     }
@@ -189,9 +186,9 @@ void MainWindow::readSocket()
         showStatusMessage("<font color='green'>Successfully registered!");
         if(bWiegand->openBareer())
             showStatusMessage("<font color='green'>Bareer opened!");
-
         return;
     }
+
         //EXIT mode
     case Replies::WIEGAND_NOT_REGISTERED:{
         if(!in.commitTransaction())
@@ -214,8 +211,14 @@ void MainWindow::readSocket()
         ui->exit_time_label->setText(out_time.toString());
         ui->exit_number_label->setText(QString::number(bSettings->modeSettings().bareerNumber));
         ui->price_label->setText(QString("%1").arg(price));
+
+        QString temp = QString("%1 Часов %2 Минут");
+
+        ui->duration_label->setText(temp);
+
         showStatusMessage("<font color='green'>WIEGAND ID is deactivated");
-        //on_print_button_clicked();
+
+        print();
         return;
     }
     }
@@ -239,6 +242,27 @@ void MainWindow::displaySocketError(QAbstractSocket::SocketError socketError)
     makeDisconnection();
 }
 
+void MainWindow::print()
+{
+    QString text = QString("Tashkent Trade Center %1\n"
+                           "Карта: %2\n"
+                           "От: %3\n"
+                           "До: %4\n"
+                           "Время: %5\n"
+                           "Цена: %6")
+            .arg(bSettings->modeSettings().bareerNumber)
+            .arg(ui->wiegand_label->text())
+            .arg(ui->enter_time_label->text())
+            .arg(ui->exit_time_label->text())
+            .arg(ui->duration_label->text())
+            .arg(ui->price_label->text());
+
+    QPainter painter;
+    painter.begin(&bPrinter);
+    painter.drawText(100, 100, 500, 500, Qt::AlignLeft|Qt::AlignTop, text);
+    painter.end();
+}
+
 void MainWindow::initActionsConnections()
 {
     connect(ui->actionQuit, &QAction::triggered, this, &MainWindow::close);
@@ -246,6 +270,8 @@ void MainWindow::initActionsConnections()
     connect(ui->actionAbout, &QAction::triggered, this, &MainWindow::about);
     connect(ui->actionConnect,&QAction::triggered, this, &MainWindow::makeConnection);
     connect(ui->actionDisconnect, &QAction::triggered, this, &MainWindow::makeDisconnection);
+    connect(ui->actionPrint, &QAction::triggered, this, &MainWindow::print);
+    connect(ui->actioPrinterSettings, &QAction::triggered, bPrintDialog->exec());
 }
 
 void MainWindow::readSettings()
@@ -292,6 +318,12 @@ void MainWindow::readSettings()
     wiegand.gpio_1 = settings.value("wiegand_gpio_1",quint8()).toUInt();
 
     bSettings->setWiegandSettings(wiegand);
+
+    if(mode.mode){
+        ui->duration_label->setVisible(false);
+        ui->price_label->setVisible(false);
+        ui->label_5->setVisible(false);
+    }
 }
 
 void MainWindow::writeSettings()
@@ -321,18 +353,16 @@ void MainWindow::writeSettings()
     settings.setValue("wiegand_gpio_1",wiegand.gpio_1);
 }
 
-void MainWindow::on_print_button_clicked()
-{
-    wiegandCallback(26,12345678);
-}
-
 void MainWindow::setUpServer()
 {
     QByteArray Buffer;
     QDataStream out(&Buffer,QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_5_7);
 
-    out<<true<<bSettings->modeSettings().bareerNumber<<bSettings->modeSettings().mode<<bSettings->dvrSettings().host;
+    out<<true
+      <<bSettings->modeSettings().bareerNumber
+     <<bSettings->modeSettings().mode
+    <<bSettings->dvrSettings().host;
 
     bsocket->write(Buffer);
     bsocket->waitForReadyRead();
