@@ -23,7 +23,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>3</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="server_tab">
       <attribute name="title">
@@ -125,6 +125,63 @@
          </property>
          <property name="value">
           <number>3306</number>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="mode_tab">
+      <attribute name="title">
+       <string>Mode</string>
+      </attribute>
+      <layout class="QFormLayout" name="formLayout_4">
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_12">
+         <property name="text">
+          <string>Mode:</string>
+         </property>
+         <property name="buddy">
+          <cstring>mode_combo</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QComboBox" name="mode_combo">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <item>
+          <property name="text">
+           <string>ENTER</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>EXIT</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QSpinBox" name="barrier_number_spin">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="minimum">
+          <number>1</number>
+         </property>
+         <property name="maximum">
+          <number>16</number>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_13">
+         <property name="text">
+          <string>Bareer number</string>
+         </property>
+         <property name="buddy">
+          <cstring>barrier_number_spin</cstring>
          </property>
         </widget>
        </item>
@@ -324,11 +381,6 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="mode_tab">
-      <attribute name="title">
-       <string>Mode</string>
-      </attribute>
-     </widget>
     </widget>
    </item>
    <item>
@@ -352,8 +404,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>227</x>
-     <y>282</y>
+     <x>236</x>
+     <y>237</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -368,8 +420,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>295</x>
-     <y>288</y>
+     <x>268</x>
+     <y>237</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>

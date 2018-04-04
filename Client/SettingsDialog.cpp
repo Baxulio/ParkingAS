@@ -2,12 +2,14 @@
 #include "ui_SettingsDialog.h"
 
 SettingsDialog::SettingsDialog(SettingsDialog::ServerSettings server,
+                               ModeSettings mode,
                                SettingsDialog::DVRSettings dvr,
                                SettingsDialog::WiegandSettings wiegand,
                                QWidget *parent)
     : QDialog(parent),
       ui(new Ui::SettingsDialog),
       bServerSettings(server),
+      bModeSettings(mode),
       bDVRSettings(dvr),
       bWiegandSettings(wiegand)
 {
@@ -36,6 +38,13 @@ void SettingsDialog::setServerSettings(const SettingsDialog::ServerSettings serv
     ui->server_login_line_edit->setText(bServerSettings.user);
 }
 
+void SettingsDialog::setModeSettings(const SettingsDialog::ModeSettings mode)
+{
+    bModeSettings = mode;
+    ui->mode_combo->setCurrentIndex(bModeSettings.mode);
+    ui->barrier_number_spin->setValue(bModeSettings.bareerNumber);
+}
+
 void SettingsDialog::setDvrSettings(const SettingsDialog::DVRSettings dvr)
 {
     bDVRSettings=dvr;
@@ -59,6 +68,9 @@ void SettingsDialog::updateSettings()
     bServerSettings.password = ui->server_password_line_edit->text();
     bServerSettings.port = ui->server_port_spin_box->value();
     bServerSettings.user = ui->server_login_line_edit->text();
+
+    bModeSettings.mode = ui->mode_combo->currentIndex();
+    bModeSettings.bareerNumber = ui->barrier_number_spin->value();
 
     bDVRSettings.connectionMethod = ui->dvr_method_comboBox->currentIndex();
     bDVRSettings.host = ui->dvr_hostname_line_edit->text();

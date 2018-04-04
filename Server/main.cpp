@@ -26,6 +26,9 @@ static bool createConnection()
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
+    QCoreApplication::setOrganizationName("Baxulio");
+    QCoreApplication::setApplicationName("ParkingAS");
+    QCoreApplication::setApplicationVersion(QT_VERSION_STR);
 
     if(!createConnection())
         return EXIT_FAILURE;
