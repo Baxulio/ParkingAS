@@ -1,0 +1,11 @@
+DELIMITER $$
+CREATE DEFINER=`root`@`%` PROCEDURE `RegisterCar`(IN `b_rfid` INT, IN `b_in_number` TINYINT, IN `b_img` TINYTEXT)
+    MODIFIES SQL DATA
+BEGIN
+
+INSERT INTO `Parking`.`Active` (`rf_id`, `in_time`, `in_number`, `img`) 
+VALUES (b_rfid,SYSDATE(), b_in_number, b_img);
+
+END$$
+DELIMITER ;
+ 
