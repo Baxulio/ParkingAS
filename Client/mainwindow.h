@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include <QPrinter>
 #include <QPrintDialog>
+#include <DatabaseManager.h>
+#include <QSqlTableModel>
 
 namespace Ui {
 class MainWindow;
@@ -11,6 +13,7 @@ class MainWindow;
 
 class SettingsDialog;
 class QLabel;
+class ProxyModel;
 
 class MainWindow : public QMainWindow
 {
@@ -21,6 +24,9 @@ private:
     QLabel *label;
     QPrintDialog *bPrintDialog;
     QPrinter bPrinter;
+    DatabaseManager& mDb;
+    QSqlTableModel *sourceModel;
+    ProxyModel *proxyModel;
 
 public:
     explicit MainWindow(QWidget *parent = 0);
@@ -37,6 +43,9 @@ private slots:
     void makeDisconnection();
 
     void print();
+
+    void on_in_from_dateTime_dateTimeChanged(const QDateTime &dateTime);
+
 private:
     void initActionsConnections();
 

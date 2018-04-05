@@ -12,6 +12,8 @@
 #include <QMessageBox>
 
 #include <QDateTime>
+#include <QSqlError>
+#include "ProxyModel.h"
 
 #include <QPainter>
 
@@ -20,13 +22,24 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow),
     bSettings(new SettingsDialog),
     label(new QLabel(this)),
-    bPrintDialog(new QPrintDialog(&bPrinter,this))
+    bPrintDialog(new QPrintDialog(&bPrinter,this)),
+    mDb(DatabaseManager::instance()),
+    sourceModel(new QSqlTableModel(this)),
+    proxyModel(new ProxyModel(this))
 {
     ui->setupUi(this);
     ui->statusBar->addPermanentWidget(label);
 
     readSettings();
     initActionsConnections();
+
+    proxyModel->setSourceModel(sourceModel);
+    ui->tableView->setModel(proxyModel);
+    //    ui->tableView->setAlternatingRowColors(true);
+    //    ui->tableView->setSortingEnabled(true);
+    //    ui->tableView->sortByColumn(0, Qt::AscendingOrder);
+
+    makeConnection();
 }
 
 MainWindow::~MainWindow()
@@ -66,6 +79,18 @@ void MainWindow::showStatusMessage(const QString &message)
 
 void MainWindow::makeConnection()
 {
+    QSqlError err=mDb.connect("Parking",bSettings->serverSettings().host,bSettings->serverSettings().user,bSettings->serverSettings().password,bSettings->serverSettings().port);
+    if(err.type() != QSqlError::NoError)
+        showStatusMessage(QString("<font color='red'>%1").arg(err.text()));
+
+    ui->status_combo->currentIndex()?sourceModel->setTable("History"):
+                                     sourceModel->setTable("Active");
+
+    if(!sourceModel->select()){
+        showStatusMessage(QString("<font color='red'>%1").arg(sourceModel->lastError().driverText()));
+        return;
+    }
+
     ui->actionConnect->setEnabled(false);
 }
 
@@ -101,6 +126,8 @@ void MainWindow::readSettings()
         restoreGeometry(geometry);
     }
 
+    ui->status_combo->setCurrentIndex(settings.value("mode",int()).toInt());
+
     if(!settings.contains("server_host")){
         return;
     }
@@ -113,7 +140,6 @@ void MainWindow::readSettings()
     bSettings->setServerSettings(server);
 
     SettingsDialog::PriceSettings price;
-
     bSettings->setPriceSettings(price);
 }
 
@@ -129,4 +155,11 @@ void MainWindow::writeSettings()
     settings.setValue("server_port", server.port);
 
     SettingsDialog::PriceSettings price = bSettings->priceSettings();
+
+    settings.setValue("mode",ui->status_combo->currentIndex());
+}
+
+void MainWindow::on_in_from_dateTime_dateTimeChanged(const QDateTime &dateTime)
+{
+    ui->in_to_dateTime->setDateTime(dateTime);
 }

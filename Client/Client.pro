@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui printsupport
+QT       += core gui printsupport sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -26,11 +26,15 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    SettingsDialog.cpp
+    SettingsDialog.cpp \
+    DatabaseManager.cpp \
+    ProxyModel.cpp
 
 HEADERS += \
         mainwindow.h \
-    SettingsDialog.h
+    SettingsDialog.h \
+    DatabaseManager.h \
+    ProxyModel.h
 
 FORMS += \
         mainwindow.ui \

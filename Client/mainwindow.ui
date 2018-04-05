@@ -41,6 +41,33 @@
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_3">
           <item>
+           <widget class="QLabel" name="label_8">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Состояние</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="status_combo">
+            <item>
+             <property name="text">
+              <string>История</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>В парковке</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item>
            <widget class="QLabel" name="label_5">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -54,7 +81,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QSpinBox" name="spinBox"/>
+           <widget class="QSpinBox" name="wiegand_id_spin"/>
           </item>
          </layout>
         </item>
@@ -89,7 +116,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QDateTimeEdit" name="dateTimeEdit">
+              <widget class="QDateTimeEdit" name="in_from_dateTime">
                <property name="showGroupSeparator" stdset="0">
                 <bool>false</bool>
                </property>
@@ -113,7 +140,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QDateTimeEdit" name="dateTimeEdit_2">
+              <widget class="QDateTimeEdit" name="in_to_dateTime">
                <property name="showGroupSeparator" stdset="0">
                 <bool>false</bool>
                </property>
@@ -161,7 +188,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QDateTimeEdit" name="dateTimeEdit_5">
+              <widget class="QDateTimeEdit" name="on_from_dateTime">
                <property name="showGroupSeparator" stdset="0">
                 <bool>false</bool>
                </property>
@@ -185,7 +212,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QDateTimeEdit" name="dateTimeEdit_6">
+              <widget class="QDateTimeEdit" name="out_to_dateTime">
                <property name="showGroupSeparator" stdset="0">
                 <bool>false</bool>
                </property>
@@ -215,7 +242,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QSpinBox" name="spinBox_2"/>
+           <widget class="QSpinBox" name="in_spin"/>
           </item>
           <item>
            <widget class="QLabel" name="label_7">
@@ -225,7 +252,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QSpinBox" name="spinBox_3"/>
+           <widget class="QSpinBox" name="out_spin"/>
           </item>
          </layout>
         </item>
