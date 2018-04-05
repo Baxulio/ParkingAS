@@ -2,18 +2,15 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "wiegand.hpp"
-#include <QAbstractSocket>
+#include <QPrinter>
+#include <QPrintDialog>
 
 namespace Ui {
 class MainWindow;
 }
 
-class QTcpSocket;
 class SettingsDialog;
 class QLabel;
-class QPrintDialog;
-class QPrinter;
 
 class MainWindow : public QMainWindow
 {
@@ -22,8 +19,6 @@ private:
     Ui::MainWindow *ui;
     SettingsDialog *bSettings;
     QLabel *label;
-    Wiegand *bWiegand;
-    QTcpSocket *bsocket;
     QPrintDialog *bPrintDialog;
     QPrinter bPrinter;
 
@@ -40,14 +35,9 @@ private slots:
     void showStatusMessage(const QString &message);
     void makeConnection();
     void makeDisconnection();
-    void wiegandCallback(int bits, quint32 value);
-
-    void readSocket();
-    void displaySocketError(QAbstractSocket::SocketError socketError);
 
     void print();
 private:
-    void setUpServer();
     void initActionsConnections();
 
     void readSettings();

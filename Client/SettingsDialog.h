@@ -19,46 +19,24 @@ public:
         quint32 port;
     };
 
-    struct ModeSettings {
-        bool mode;
-        quint8 bareerNumber;
+    struct PriceSettings {
     };
-    struct DVRSettings {
-        QString host;
-        QString user;
-        QString password;
-        quint32 port;
-        quint8 connectionMethod;
-    };
-    struct WiegandSettings {
-        quint8 gpio_0;
-        quint8 gpio_1;
-    };
+
     explicit SettingsDialog(ServerSettings server = ServerSettings{QString("ParkingServer"),QString("ParkingUser"),QString(""),quint32(3306)},
-                            ModeSettings mode = ModeSettings{true,1},
-                            DVRSettings dvr = DVRSettings{QString("DVR1"), QString("DVRUser"),QString(""),quint32(34567),quint8(0)},
-                            WiegandSettings wiegand = WiegandSettings{quint8(1),quint8(2)},
+                            PriceSettings price = PriceSettings{},
                             QWidget *parent = nullptr);
     ~SettingsDialog();
 
     ServerSettings serverSettings() const {return bServerSettings;}
     void setServerSettings(const ServerSettings server);
 
-    ModeSettings modeSettings() const {return bModeSettings;}
-    void setModeSettings(const ModeSettings mode);
-
-    DVRSettings dvrSettings() const {return bDVRSettings;}
-    void setDvrSettings(const DVRSettings dvr);
-
-    WiegandSettings wiegandSettings() const {return bWiegandSettings;}
-    void setWiegandSettings(const WiegandSettings wiegand);
+    PriceSettings priceSettings() const {return bPriceSettings;}
+    void setPriceSettings(const PriceSettings price);
 
 private:
     Ui::SettingsDialog *ui = nullptr;
     ServerSettings bServerSettings;
-    ModeSettings bModeSettings;
-    DVRSettings bDVRSettings;
-    WiegandSettings bWiegandSettings;
+    PriceSettings bPriceSettings;
 
 private slots:
     void apply();

@@ -14,11 +14,11 @@
    <string>ParkingAS</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="rpiclientresources.qrc">
+   <iconset resource="../Client/clientresources.qrc">
     <normaloff>:/images/icons-home-parking.png</normaloff>:/images/icons-home-parking.png</iconset>
   </property>
   <property name="toolButtonStyle">
-   <enum>Qt::ToolButtonFollowStyle</enum>
+   <enum>Qt::ToolButtonTextBesideIcon</enum>
   </property>
   <property name="documentMode">
    <bool>false</bool>
@@ -56,7 +56,7 @@
          <string/>
         </property>
         <property name="pixmap">
-         <pixmap resource="rpiclientresources.qrc">:/images/icons-home-parking.png</pixmap>
+         <pixmap resource="../Client/clientresources.qrc">:/images/icons-home-parking.png</pixmap>
         </property>
         <property name="scaledContents">
          <bool>true</bool>
@@ -435,7 +435,7 @@
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionConnect">
    <property name="icon">
-    <iconset resource="rpiclientresources.qrc">
+    <iconset resource="../Client/clientresources.qrc">
      <normaloff>:/images/connect.png</normaloff>:/images/connect.png</iconset>
    </property>
    <property name="text">
@@ -453,7 +453,7 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="rpiclientresources.qrc">
+    <iconset resource="../Client/clientresources.qrc">
      <normaloff>:/images/disconnect.png</normaloff>:/images/disconnect.png</iconset>
    </property>
    <property name="text">
@@ -468,7 +468,7 @@
   </action>
   <action name="actionConfigure">
    <property name="icon">
-    <iconset resource="rpiclientresources.qrc">
+    <iconset resource="../Client/clientresources.qrc">
      <normaloff>:/images/settings.png</normaloff>:/images/settings.png</iconset>
    </property>
    <property name="text">
@@ -483,7 +483,7 @@
   </action>
   <action name="actionQuit">
    <property name="icon">
-    <iconset resource="rpiclientresources.qrc">
+    <iconset resource="../Client/clientresources.qrc">
      <normaloff>:/images/application-exit.png</normaloff>:/images/application-exit.png</iconset>
    </property>
    <property name="text">
@@ -500,7 +500,7 @@
   </action>
   <action name="actionPrint">
    <property name="icon">
-    <iconset resource="rpiclientresources.qrc">
+    <iconset resource="../Client/clientresources.qrc">
      <normaloff>:/images/Cheque.png</normaloff>:/images/Cheque.png</iconset>
    </property>
    <property name="text">
@@ -518,7 +518,7 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
-  <include location="rpiclientresources.qrc"/>
+  <include location="../Client/clientresources.qrc"/>
  </resources>
  <connections/>
 </ui>

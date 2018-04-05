@@ -6,19 +6,19 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>643</width>
-    <height>582</height>
+    <width>899</width>
+    <height>639</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>ParkingAS</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="rpiclientresources.qrc">
+   <iconset resource="clientresources.qrc">
     <normaloff>:/images/icons-home-parking.png</normaloff>:/images/icons-home-parking.png</iconset>
   </property>
   <property name="toolButtonStyle">
-   <enum>Qt::ToolButtonFollowStyle</enum>
+   <enum>Qt::ToolButtonTextBesideIcon</enum>
   </property>
   <property name="documentMode">
    <bool>false</bool>
@@ -33,349 +33,206 @@
    <bool>true</bool>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout">
+   <layout class="QVBoxLayout" name="verticalLayout_6">
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <layout class="QVBoxLayout" name="verticalLayout_5">
       <item>
-       <widget class="QLabel" name="label_6">
-        <property name="maximumSize">
-         <size>
-          <width>100</width>
-          <height>100</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <pointsize>15</pointsize>
-         </font>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">color: rgb(140, 140, 140);</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="pixmap">
-         <pixmap resource="rpiclientresources.qrc">:/images/icons-home-parking.png</pixmap>
-        </property>
-        <property name="scaledContents">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="label_4">
-        <property name="font">
-         <font>
-          <pointsize>15</pointsize>
-         </font>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">color: rgb(140, 140, 140);</string>
-        </property>
-        <property name="text">
-         <string>Parking Automated System</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_5">
-      <item>
-       <spacer name="horizontalSpacer_2">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
-       <widget class="QLabel" name="duration_label">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="font">
-         <font>
-          <pointsize>40</pointsize>
-          <kerning>true</kerning>
-         </font>
-        </property>
-        <property name="text">
-         <string>0 Hours 0 Minutes</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer_3">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_6">
-      <item>
-       <spacer name="horizontalSpacer_4">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
-       <widget class="QLabel" name="price_label">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="font">
-         <font>
-          <pointsize>150</pointsize>
-         </font>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">color: rgb(170, 255, 127);</string>
-        </property>
-        <property name="text">
-         <string>0</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="label_5">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="font">
-         <font>
-          <pointsize>30</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>(UZS)</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer_5">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_7">
-      <item>
-       <widget class="QLabel" name="label">
-        <property name="font">
-         <font>
-          <pointsize>15</pointsize>
-         </font>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">color: rgb(140, 140, 140);</string>
-        </property>
-        <property name="text">
-         <string>WIEGAND ID :</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="wiegand_label">
-        <property name="font">
-         <font>
-          <pointsize>15</pointsize>
-         </font>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">color: rgb(140, 140, 140);</string>
-        </property>
-        <property name="text">
-         <string>0</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer_7">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <layout class="QHBoxLayout" name="horizontalLayout_5">
         <item>
-         <widget class="QLabel" name="enter_number_label">
-          <property name="font">
-           <font>
-            <pointsize>15</pointsize>
-           </font>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <widget class="QLabel" name="label_5">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Номер карты:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="spinBox"/>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="groupBox">
+          <property name="title">
+           <string>Время въезда</string>
           </property>
-          <property name="styleSheet">
-           <string notr="true">color: rgb(140, 140, 140);</string>
-          </property>
-          <property name="text">
-           <string>#</string>
-          </property>
+          <layout class="QVBoxLayout" name="verticalLayout">
+           <property name="spacing">
+            <number>5</number>
+           </property>
+           <property name="leftMargin">
+            <number>5</number>
+           </property>
+           <property name="topMargin">
+            <number>5</number>
+           </property>
+           <property name="rightMargin">
+            <number>5</number>
+           </property>
+           <property name="bottomMargin">
+            <number>5</number>
+           </property>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout">
+             <item>
+              <widget class="QLabel" name="label">
+               <property name="text">
+                <string>От:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QDateTimeEdit" name="dateTimeEdit">
+               <property name="showGroupSeparator" stdset="0">
+                <bool>false</bool>
+               </property>
+               <property name="currentSection">
+                <enum>QDateTimeEdit::DaySection</enum>
+               </property>
+               <property name="calendarPopup">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_2">
+             <item>
+              <widget class="QLabel" name="label_2">
+               <property name="text">
+                <string>До:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QDateTimeEdit" name="dateTimeEdit_2">
+               <property name="showGroupSeparator" stdset="0">
+                <bool>false</bool>
+               </property>
+               <property name="currentSection">
+                <enum>QDateTimeEdit::DaySection</enum>
+               </property>
+               <property name="calendarPopup">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="label_3">
-          <property name="font">
-           <font>
-            <pointsize>15</pointsize>
-           </font>
+         <widget class="QGroupBox" name="groupBox_2">
+          <property name="title">
+           <string>Время выезда</string>
           </property>
-          <property name="styleSheet">
-           <string notr="true">color: rgb(140, 140, 140);</string>
-          </property>
-          <property name="text">
-           <string>ENTER TIME :</string>
-          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_2">
+           <property name="spacing">
+            <number>5</number>
+           </property>
+           <property name="leftMargin">
+            <number>5</number>
+           </property>
+           <property name="topMargin">
+            <number>5</number>
+           </property>
+           <property name="rightMargin">
+            <number>5</number>
+           </property>
+           <property name="bottomMargin">
+            <number>5</number>
+           </property>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_3">
+             <item>
+              <widget class="QLabel" name="label_3">
+               <property name="text">
+                <string>От:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QDateTimeEdit" name="dateTimeEdit_5">
+               <property name="showGroupSeparator" stdset="0">
+                <bool>false</bool>
+               </property>
+               <property name="currentSection">
+                <enum>QDateTimeEdit::DaySection</enum>
+               </property>
+               <property name="calendarPopup">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_4">
+             <item>
+              <widget class="QLabel" name="label_4">
+               <property name="text">
+                <string>До:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QDateTimeEdit" name="dateTimeEdit_6">
+               <property name="showGroupSeparator" stdset="0">
+                <bool>false</bool>
+               </property>
+               <property name="currentSection">
+                <enum>QDateTimeEdit::DaySection</enum>
+               </property>
+               <property name="calendarPopup">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="enter_time_label">
-          <property name="font">
-           <font>
-            <pointsize>15</pointsize>
-           </font>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <property name="spacing">
+           <number>0</number>
           </property>
-          <property name="styleSheet">
-           <string notr="true">color: rgb(140, 140, 140);</string>
-          </property>
-          <property name="text">
-           <string>00.00.00 00.00.00</string>
-          </property>
-         </widget>
+          <item>
+           <widget class="QLabel" name="label_6">
+            <property name="text">
+             <string>Въезд №</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="spinBox_2"/>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_7">
+            <property name="text">
+             <string>Выезд №</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="spinBox_3"/>
+          </item>
+         </layout>
         </item>
        </layout>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
-        <item>
-         <widget class="QLabel" name="exit_number_label">
-          <property name="font">
-           <font>
-            <pointsize>15</pointsize>
-           </font>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">color: rgb(140, 140, 140);</string>
-          </property>
-          <property name="text">
-           <string>#</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="label_2">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="font">
-           <font>
-            <pointsize>15</pointsize>
-           </font>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">color: rgb(140, 140, 140);</string>
-          </property>
-          <property name="text">
-           <string>EXIT TIME :</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="exit_time_label">
-          <property name="font">
-           <font>
-            <pointsize>15</pointsize>
-           </font>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">color: rgb(140, 140, 140);</string>
-          </property>
-          <property name="text">
-           <string>00.00.00 00.00.00</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer_6">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
+       <widget class="QTableView" name="tableView"/>
       </item>
      </layout>
     </item>
@@ -386,7 +243,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>643</width>
+     <width>899</width>
      <height>21</height>
     </rect>
    </property>
@@ -395,7 +252,6 @@
      <string>Calls</string>
     </property>
     <addaction name="actionConnect"/>
-    <addaction name="actionDisconnect"/>
     <addaction name="separator"/>
     <addaction name="actionPrint"/>
     <addaction name="separator"/>
@@ -426,16 +282,24 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionConnect"/>
-   <addaction name="actionDisconnect"/>
-   <addaction name="separator"/>
-   <addaction name="actionPrint"/>
    <addaction name="separator"/>
    <addaction name="actionConfigure"/>
+   <addaction name="separator"/>
+   <addaction name="actionPrint"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QDockWidget" name="dockWidget">
+   <property name="floating">
+    <bool>false</bool>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents"/>
+  </widget>
   <action name="actionConnect">
    <property name="icon">
-    <iconset resource="rpiclientresources.qrc">
+    <iconset resource="clientresources.qrc">
      <normaloff>:/images/connect.png</normaloff>:/images/connect.png</iconset>
    </property>
    <property name="text">
@@ -453,7 +317,7 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="rpiclientresources.qrc">
+    <iconset resource="clientresources.qrc">
      <normaloff>:/images/disconnect.png</normaloff>:/images/disconnect.png</iconset>
    </property>
    <property name="text">
@@ -468,7 +332,7 @@
   </action>
   <action name="actionConfigure">
    <property name="icon">
-    <iconset resource="rpiclientresources.qrc">
+    <iconset resource="clientresources.qrc">
      <normaloff>:/images/settings.png</normaloff>:/images/settings.png</iconset>
    </property>
    <property name="text">
@@ -483,7 +347,7 @@
   </action>
   <action name="actionQuit">
    <property name="icon">
-    <iconset resource="rpiclientresources.qrc">
+    <iconset resource="clientresources.qrc">
      <normaloff>:/images/application-exit.png</normaloff>:/images/application-exit.png</iconset>
    </property>
    <property name="text">
@@ -500,7 +364,7 @@
   </action>
   <action name="actionPrint">
    <property name="icon">
-    <iconset resource="rpiclientresources.qrc">
+    <iconset resource="clientresources.qrc">
      <normaloff>:/images/Cheque.png</normaloff>:/images/Cheque.png</iconset>
    </property>
    <property name="text">
@@ -518,7 +382,7 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
-  <include location="rpiclientresources.qrc"/>
+  <include location="clientresources.qrc"/>
  </resources>
  <connections/>
 </ui>

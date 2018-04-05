@@ -26,7 +26,7 @@ MainWindow::MainWindow(QWidget *parent) :
     bWiegand(new Wiegand(this)),
     bsocket(new QTcpSocket(this)),
     label(new QLabel(this)),
-    bPrintDialog(new QPrintDialog(bPrinter,this))
+    bPrintDialog(new QPrintDialog(&bPrinter,this))
 {
     ui->setupUi(this);
     ui->statusBar->addPermanentWidget(label);
@@ -272,7 +272,7 @@ void MainWindow::initActionsConnections()
     connect(ui->actionConnect,&QAction::triggered, this, &MainWindow::makeConnection);
     connect(ui->actionDisconnect, &QAction::triggered, this, &MainWindow::makeDisconnection);
     connect(ui->actionPrint, &QAction::triggered, this, &MainWindow::print);
-    connect(ui->actionPrinterSettings, &QAction::triggered, bPrintDialog->exec());
+    connect(ui->actionPrinterSettings, &QAction::triggered, [this](){bPrintDialog->exec();});
 }
 
 void MainWindow::readSettings()

@@ -32,17 +32,17 @@ void MyTask::run()
 {
     QSqlQuery query;
     query.exec(QString("SELECT `Active`.`in_time`,\
-                               `Active`.`in_number`,\
-                        FROM `Parking`.`Active`;\
-                        WHERE `Active`.`rf_id`=%1").arg(bWiegand));
-    if(!query.exec()){
-        qDebug()<<query.lastError().driverText();
-        return;
-    }
-    query.next();
+                       `Active`.`in_number`,\
+                       FROM `Parking`.`Active`;\
+               WHERE `Active`.`rf_id`=%1").arg(bWiegand));
+            if(!query.exec()){
+            qDebug()<<query.lastError().driverText();
+            return;
+}
+            query.next();
 
-    ////ENTER
-    if(bBareerMode){
+            ////ENTER
+            if(bBareerMode){
         if(query.isValid()){
             emit Result(Replies::WIEGAND_ALREADY_REGISTERED,
                         query.value("in_time").toDateTime(),
@@ -70,30 +70,30 @@ void MyTask::run()
 
     /////EXIT
     else {
-    if(!query.isValid()){
-        emit Result(Replies::WIEGAND_NOT_REGISTERED);
-        return;
-    }
-    if(!snapshot()){
-        emit Result(Replies::SNAPSHOT_FAIL);
-        return;
-    }
-    query.prepare("CALL `Parking`.`MoveToHistory`(:b_rf_id, :b_out_number, :b_img_out);");
-    query.bindValue(":b_rf_id",bWiegand);
-    query.bindValue(":b_out_number", bBareerNo);
-    query.bindValue(":b_img_out", cFileName);
+        if(!query.isValid()){
+            emit Result(Replies::WIEGAND_NOT_REGISTERED);
+            return;
+        }
+        if(!snapshot()){
+            emit Result(Replies::SNAPSHOT_FAIL);
+            return;
+        }
+        query.prepare("CALL `Parking`.`MoveToHistory`(:b_rf_id, :b_out_number, :b_img_out);");
+        query.bindValue(":b_rf_id",bWiegand);
+        query.bindValue(":b_out_number", bBareerNo);
+        query.bindValue(":b_img_out", cFileName);
 
-    if(!query.exec()){
-        qDebug()<<query.lastError().driverText();
-        return;
-    }
+        if(!query.exec()){
+            qDebug()<<query.lastError().driverText();
+            return;
+        }
 
-    query.next();
-    emit Result(Replies::WIEGAND_DEACTIVATED,
-                query.value("in_time").toDateTime(),
-                query.value("in_number").toUInt(),
-                query.value("out_time").toDateTime(),
-                query.value("price").toDouble());
+        query.next();
+        emit Result(Replies::WIEGAND_DEACTIVATED,
+                    query.value("in_time").toDateTime(),
+                    query.value("in_number").toUInt(),
+                    query.value("out_time").toDateTime(),
+                    query.value("price").toDouble());
     }
 }
 
@@ -102,13 +102,14 @@ bool MyTask::snapshot()
     QDateTime time = QDateTime::currentDateTime();
 
     QString fileName = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation)+
-            QString("/Parking/%1%2%3_%4%5%6.bmp")
+            QString("/Parking/%1%2%3_%4%5%6_%7.bmp")
             .arg(time.date().year())
             .arg(time.date().month())
             .arg(time.date().day())
             .arg(time.time().hour())
             .arg(time.time().minute())
-            .arg(time.time().second());
+            .arg(time.time().second())
+            .arg(bBareerNo);
 
     QByteArray ba = fileName.toLatin1();
     cFileName = ba.data();
