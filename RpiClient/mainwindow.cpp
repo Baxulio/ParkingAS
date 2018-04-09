@@ -1,23 +1,22 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include "SettingsDialog.h"
-#include <QTcpSocket>
-
 #include <QSettings>
-
 #include <QDesktopWidget>
 #include <QCloseEvent>
-
 #include <QLabel>
 #include <QMessageBox>
-
 #include <QDateTime>
-#include "../core.h"
 
 #include <QPrinter>
 #include <QPrintDialog>
 #include <QPainter>
+
+#include <QTcpSocket>
+
+#include "SettingsDialog.h"
+
+#include "../core.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -130,6 +129,7 @@ void MainWindow::wiegandCallback(int bits, quint32 value)
 void MainWindow::readSocket()
 {
     QByteArray arr=bsocket->readAll();
+
     QDataStream in(&arr,QIODevice::ReadOnly);
     in.setVersion(QDataStream::Qt_5_7);
 

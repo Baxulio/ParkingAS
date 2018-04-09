@@ -41,7 +41,7 @@ void SettingsDialog::setServerSettings(const SettingsDialog::ServerSettings serv
 void SettingsDialog::setModeSettings(const SettingsDialog::ModeSettings mode)
 {
     bModeSettings = mode;
-    ui->mode_combo->setCurrentIndex(bModeSettings.mode);
+    ui->enterRadio->setChecked(bModeSettings.mode);
     ui->barrier_number_spin->setValue(bModeSettings.bareerNumber);
 }
 
@@ -69,7 +69,7 @@ void SettingsDialog::updateSettings()
     bServerSettings.port = ui->server_port_spin_box->value();
     bServerSettings.user = ui->server_login_line_edit->text();
 
-    bModeSettings.mode = ui->mode_combo->currentIndex();
+    bModeSettings.mode = ui->enterRadio->isChecked();
     bModeSettings.bareerNumber = ui->barrier_number_spin->value();
 
     bDVRSettings.connectionMethod = ui->dvr_method_comboBox->currentIndex();

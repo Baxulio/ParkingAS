@@ -22,8 +22,12 @@ private:
     Ui::MainWindow *ui;
     SettingsDialog *bSettings;
     QLabel *label;
+
     Wiegand *bWiegand;
+
     QTcpSocket *bsocket;
+    QDataStream in;
+
     QPrintDialog *bPrintDialog;
     QPrinter bPrinter;
 
