@@ -1,15 +1,85 @@
 #include "ProxyModel.h"
 
 ProxyModel::ProxyModel(QObject *parent):
-    QSortFilterProxyModel (parent)
+    QSortFilterProxyModel (parent),
+    in(0),out(0),rf_id(0)
 {
 
 }
 
-bool ProxyModel::lessThan(const QModelIndex &source_left, const QModelIndex &source_right) const
+void ProxyModel::setFilterRf_Id(const quint32 &id)
 {
+    rf_id=id;
+    invalidateFilter();
+}
+
+void ProxyModel::setFilterIn(const quint8 &in)
+{
+    this->in=in;
+    invalidateFilter();
+}
+
+void ProxyModel::setFilterOut(const quint8 &out)
+{
+    this->out=out;
+    invalidateFilter();
+}
+
+void ProxyModel::setFilterIn_Time_From(const QDateTime &time)
+{
+    in_time_from=time;
+    invalidateFilter();
+}
+
+void ProxyModel::setFilterIn_Time_To(const QDateTime &time)
+{
+    in_time_to=time;
+    invalidateFilter();
+}
+
+void ProxyModel::setFilterOut_Time_From(const QDateTime &time)
+{
+ out_time_from=time;
+ invalidateFilter();
+}
+
+void ProxyModel::setFilterOut_Time_To(const QDateTime &time)
+{
+    out_time_to=time;
+    invalidateFilter();
 }
 
 bool ProxyModel::filterAcceptsRow(int source_row, const QModelIndex &source_parent) const
 {
+    if(rf_id && sourceModel()->data(sourceModel()->index(source_row, 1, source_parent)).toInt()!=rf_id)
+        return false;
+    if(in && sourceModel()->data(sourceModel()->index(source_row, 4, source_parent)).toInt()!=in)
+        return false;
+    if(out && sourceModel()->data(sourceModel()->index(source_row, 5, source_parent)).toInt()!=out)
+        return false;
+
+    if(!dateInRange(sourceModel()->data(sourceModel()->index(source_row, 2, source_parent)).toDateTime(),1))
+        return false;
+
+    if(!dateInRange(sourceModel()->data(sourceModel()->index(source_row, 3, source_parent)).toDateTime(),0))
+        return false;
+
+    return true;
+}
+
+bool ProxyModel::filterAcceptsColumn(int source_column, const QModelIndex &source_parent) const
+{
+    if(source_column == 0 || source_column==7 || source_column == 8)
+        return false;
+    return true;
+}
+
+bool ProxyModel::dateInRange(const QDateTime &dateTime, bool mode) const
+{
+    if(mode){
+        return (!in_time_from.isValid() || dateTime>=in_time_from)
+                && (!in_time_to.isValid() || dateTime<=in_time_to);
+    }
+    return (!out_time_from.isValid() || dateTime>=out_time_from)
+            && (!out_time_to.isValid() || dateTime<=out_time_to);
 }

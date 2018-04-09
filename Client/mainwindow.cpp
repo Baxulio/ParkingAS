@@ -16,13 +16,14 @@
 #include "ProxyModel.h"
 
 #include <QPainter>
+#include <QImage>
+#include <QPixmap>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     bSettings(new SettingsDialog),
     label(new QLabel(this)),
-    bPrintDialog(new QPrintDialog(&bPrinter,this)),
     mDb(DatabaseManager::instance()),
     sourceModel(new QSqlTableModel(this)),
     proxyModel(new ProxyModel(this))
@@ -30,14 +31,14 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     ui->statusBar->addPermanentWidget(label);
 
+    bPrintDialog = new QPrintDialog(&bPrinter,this);
+
     readSettings();
     initActionsConnections();
 
     proxyModel->setSourceModel(sourceModel);
     ui->tableView->setModel(proxyModel);
-    //    ui->tableView->setAlternatingRowColors(true);
-    //    ui->tableView->setSortingEnabled(true);
-    //    ui->tableView->sortByColumn(0, Qt::AscendingOrder);
+    connect(ui->tableView, &QTableView::clicked, this, &MainWindow::reloadSnapshot);
 
     makeConnection();
 }
@@ -80,18 +81,15 @@ void MainWindow::showStatusMessage(const QString &message)
 void MainWindow::makeConnection()
 {
     QSqlError err=mDb.connect("Parking",bSettings->serverSettings().host,bSettings->serverSettings().user,bSettings->serverSettings().password,bSettings->serverSettings().port);
-    if(err.type() != QSqlError::NoError)
+    if(err.type() != QSqlError::NoError){
         showStatusMessage(QString("<font color='red'>%1").arg(err.text()));
-
-    ui->status_combo->currentIndex()?sourceModel->setTable("History"):
-                                     sourceModel->setTable("Active");
-
-    if(!sourceModel->select()){
-        showStatusMessage(QString("<font color='red'>%1").arg(sourceModel->lastError().driverText()));
         return;
     }
 
     ui->actionConnect->setEnabled(false);
+    showStatusMessage("<font color='green'>Successfully connected!");
+
+    emit on_status_combo_currentIndexChanged(ui->status_combo->currentIndex());
 }
 
 void MainWindow::makeDisconnection()
@@ -101,6 +99,29 @@ void MainWindow::makeDisconnection()
 
 void MainWindow::print()
 {
+
+}
+
+void MainWindow::reloadSnapshot(const QModelIndex &index)
+{
+    QString path;
+    QPixmap pix;
+
+    if(ui->status_combo->currentIndex()==1){
+        path = bSettings->serverSettings().host+proxyModel->data(proxyModel->index(index.row(),3)).toString();
+        pix.load(path);
+        ui->enterSnapshot->setPixmap(pix);
+    }
+    else
+    {
+        path = proxyModel->data(proxyModel->index(index.row(),7)).toString();
+        pix.load(path);
+        ui->enterSnapshot->setPixmap(pix);
+
+        path = proxyModel->data(proxyModel->index(index.row(),8)).toString();
+        pix.load(path);
+        ui->exitSnapshot->setPixmap(pix);
+    }
 }
 
 void MainWindow::initActionsConnections()
@@ -161,5 +182,48 @@ void MainWindow::writeSettings()
 
 void MainWindow::on_in_from_dateTime_dateTimeChanged(const QDateTime &dateTime)
 {
+    proxyModel->setFilterIn_Time_From(dateTime);
     ui->in_to_dateTime->setDateTime(dateTime);
+}
+
+void MainWindow::on_on_from_dateTime_dateTimeChanged(const QDateTime &dateTime)
+{
+    proxyModel->setFilterOut_Time_From(dateTime);
+    ui->out_to_dateTime->setDateTime(dateTime);
+}
+
+void MainWindow::on_status_combo_currentIndexChanged(int index)
+{
+    index?sourceModel->setTable("Active"):sourceModel->setTable("History");
+
+    if(!sourceModel->select()){
+        showStatusMessage(QString("<font color='red'>%1").arg(sourceModel->lastError().driverText()));
+        makeDisconnection();
+        return;
+    }
+}
+
+void MainWindow::on_wiegand_id_spin_valueChanged(int arg1)
+{
+    proxyModel->setFilterRf_Id(arg1);
+}
+
+void MainWindow::on_in_to_dateTime_dateTimeChanged(const QDateTime &dateTime)
+{
+    proxyModel->setFilterIn_Time_To(dateTime);
+}
+
+void MainWindow::on_out_to_dateTime_dateTimeChanged(const QDateTime &dateTime)
+{
+    proxyModel->setFilterOut_Time_To(dateTime);
+}
+
+void MainWindow::on_in_spin_valueChanged(int arg1)
+{
+    proxyModel->setFilterIn(arg1);
+}
+
+void MainWindow::on_out_spin_valueChanged(int arg1)
+{
+    proxyModel->setFilterOut(arg1);
 }

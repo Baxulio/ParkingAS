@@ -28,6 +28,7 @@ private:
     QSqlTableModel *sourceModel;
     ProxyModel *proxyModel;
 
+
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
@@ -43,8 +44,23 @@ private slots:
     void makeDisconnection();
 
     void print();
+    void reloadSnapshot(const QModelIndex &index);
 
     void on_in_from_dateTime_dateTimeChanged(const QDateTime &dateTime);
+
+    void on_on_from_dateTime_dateTimeChanged(const QDateTime &dateTime);
+
+    void on_status_combo_currentIndexChanged(int index);
+
+    void on_wiegand_id_spin_valueChanged(int arg1);
+
+    void on_in_to_dateTime_dateTimeChanged(const QDateTime &dateTime);
+
+    void on_out_to_dateTime_dateTimeChanged(const QDateTime &dateTime);
+
+    void on_in_spin_valueChanged(int arg1);
+
+    void on_out_spin_valueChanged(int arg1);
 
 private:
     void initActionsConnections();

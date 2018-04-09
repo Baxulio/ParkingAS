@@ -10,12 +10,29 @@ class ProxyModel : public QSortFilterProxyModel
 public:
     ProxyModel(QObject *parent = 0);
 
+    void setFilterRf_Id(const quint32 &id);
+    void setFilterIn(const quint8 &in);
+    void setFilterOut(const quint8 &out);
+    void setFilterIn_Time_From(const QDateTime &time);
+    void setFilterIn_Time_To(const QDateTime &time);
+    void setFilterOut_Time_From(const QDateTime &time);
+    void setFilterOut_Time_To(const QDateTime &time);
+
     // QSortFilterProxyModel interface
 protected:
-    bool lessThan(const QModelIndex &source_left, const QModelIndex &source_right) const override;
     bool filterAcceptsRow(int source_row, const QModelIndex &source_parent) const override;
-
+    bool filterAcceptsColumn(int source_column, const QModelIndex &source_parent) const override;
 private:
+    bool dateInRange(const QDateTime &dateTime, bool mode) const;
+
+    QDateTime in_time_from;
+    QDateTime in_time_to;
+    QDateTime out_time_from;
+    QDateTime out_time_to;
+
+    quint32 rf_id;
+    quint8 in;
+    quint8 out;
 
 };
 
