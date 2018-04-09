@@ -9,7 +9,7 @@ static bool createConnection()
     db.setDatabaseName("Parking");
     db.setHostName("localhost");
     db.setPort(3306);
-    if (!db.open("root", "")) {
+    if (!db.open("Parking", "")) {
         return false;
     }
 //    QSqlQuery query;

@@ -31,18 +31,16 @@ MyTask::MyTask(quint32 wiegand, QString dvrip, quint8 bareerNo, bool bareerMode,
 void MyTask::run()
 {
     QSqlQuery query;
-    query.exec(QString("SELECT `Active`.`in_time`,\
-                       `Active`.`in_number`,\
-                       FROM `Parking`.`Active`;\
-               WHERE `Active`.`rf_id`=%1").arg(bWiegand));
-            if(!query.exec()){
-            qDebug()<<query.lastError().driverText();
-            return;
-}
-            query.next();
+    query.prepare("SELECT `Active`.`in_time`,`Active`.`in_number` FROM `Parking`.`Active` WHERE `Active`.`rf_id`=:rf_id");
+    query.bindValue(":rf_id",bWiegand);
+    if(!query.exec()){
+        qDebug()<<query.lastError().databaseText();
+        return;
+    }
+    query.next();
 
-            ////ENTER
-            if(bBareerMode){
+    ////ENTER
+    if(bBareerMode){
         if(query.isValid()){
             emit Result(Replies::WIEGAND_ALREADY_REGISTERED,
                         query.value("in_time").toDateTime(),
@@ -102,7 +100,7 @@ bool MyTask::snapshot()
     QDateTime time = QDateTime::currentDateTime();
 
     QString fileName = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation)+
-            QString("/Parking/%1%2%3_%4%5%6_%7.bmp")
+            QString("/Parking/%1%2%3_%4%5%6_%7.jpeg")
             .arg(time.date().year())
             .arg(time.date().month())
             .arg(time.date().day())
