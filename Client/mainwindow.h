@@ -45,12 +45,11 @@ private slots:
 
     void print();
     void reloadSnapshot(const QModelIndex &index);
+    void on_status_combo_currentIndexChanged(int index);
 
     void on_in_from_dateTime_dateTimeChanged(const QDateTime &dateTime);
 
     void on_on_from_dateTime_dateTimeChanged(const QDateTime &dateTime);
-
-    void on_status_combo_currentIndexChanged(int index);
 
     void on_wiegand_id_spin_valueChanged(int arg1);
 

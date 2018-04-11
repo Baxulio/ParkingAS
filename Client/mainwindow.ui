@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>899</width>
-    <height>639</height>
+    <width>731</width>
+    <height>368</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -120,8 +120,15 @@
                <property name="showGroupSeparator" stdset="0">
                 <bool>false</bool>
                </property>
-               <property name="currentSection">
-                <enum>QDateTimeEdit::DaySection</enum>
+               <property name="date">
+                <date>
+                 <year>2018</year>
+                 <month>1</month>
+                 <day>1</day>
+                </date>
+               </property>
+               <property name="displayFormat">
+                <string>d/M/yy h:mm AP</string>
                </property>
                <property name="calendarPopup">
                 <bool>true</bool>
@@ -144,8 +151,15 @@
                <property name="showGroupSeparator" stdset="0">
                 <bool>false</bool>
                </property>
-               <property name="currentSection">
-                <enum>QDateTimeEdit::DaySection</enum>
+               <property name="date">
+                <date>
+                 <year>2018</year>
+                 <month>1</month>
+                 <day>1</day>
+                </date>
+               </property>
+               <property name="displayFormat">
+                <string>d/M/yy h:mm AP</string>
                </property>
                <property name="calendarPopup">
                 <bool>true</bool>
@@ -188,12 +202,19 @@
               </widget>
              </item>
              <item>
-              <widget class="QDateTimeEdit" name="on_from_dateTime">
+              <widget class="QDateTimeEdit" name="out_from_dateTime">
                <property name="showGroupSeparator" stdset="0">
                 <bool>false</bool>
                </property>
-               <property name="currentSection">
-                <enum>QDateTimeEdit::DaySection</enum>
+               <property name="date">
+                <date>
+                 <year>2018</year>
+                 <month>1</month>
+                 <day>1</day>
+                </date>
+               </property>
+               <property name="displayFormat">
+                <string>d/M/yy h:mm AP</string>
                </property>
                <property name="calendarPopup">
                 <bool>true</bool>
@@ -216,8 +237,15 @@
                <property name="showGroupSeparator" stdset="0">
                 <bool>false</bool>
                </property>
-               <property name="currentSection">
-                <enum>QDateTimeEdit::DaySection</enum>
+               <property name="date">
+                <date>
+                 <year>2018</year>
+                 <month>1</month>
+                 <day>1</day>
+                </date>
+               </property>
+               <property name="displayFormat">
+                <string>d/M/yy h:mm AP</string>
                </property>
                <property name="calendarPopup">
                 <bool>true</bool>
@@ -289,7 +317,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>899</width>
+     <width>731</width>
      <height>19</height>
     </rect>
    </property>

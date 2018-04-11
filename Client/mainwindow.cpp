@@ -132,6 +132,7 @@ void MainWindow::initActionsConnections()
     connect(ui->actionConnect,&QAction::triggered, this, &MainWindow::makeConnection);
     connect(ui->actionPrint, &QAction::triggered, this, &MainWindow::print);
     connect(ui->actionPrinterSettings, &QAction::triggered, [this](){bPrintDialog->exec();});
+    connect(ui->status_combo, &QComboBox::currentIndexChanged, this, &MainWindow::statusChanged);
 }
 
 void MainWindow::readSettings()
@@ -192,7 +193,7 @@ void MainWindow::on_on_from_dateTime_dateTimeChanged(const QDateTime &dateTime)
     ui->out_to_dateTime->setDateTime(dateTime);
 }
 
-void MainWindow::on_status_combo_currentIndexChanged(int index)
+void MainWindow::statusChanged(int index)
 {
     index?sourceModel->setTable("Active"):sourceModel->setTable("History");
 
