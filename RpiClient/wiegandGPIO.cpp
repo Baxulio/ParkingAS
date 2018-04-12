@@ -1,5 +1,6 @@
+#ifdef WIEGAND_HPP
 #include <pigpio.h>
-#include "wiegand.hpp"
+#include "wiegandGPIO.hpp"
 
 bool Wiegand::startWiegand(int gpio_0, int gpio_1, int timeout)
 {
@@ -130,3 +131,4 @@ bool Wiegand::openBareer()
     //Here goes pigpio bareer controll
 }
 
+#endif

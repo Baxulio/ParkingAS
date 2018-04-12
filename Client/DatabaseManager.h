@@ -17,7 +17,7 @@ public:
     ~DatabaseManager();
 
     QSqlError connect(const QString& path = "Parking" ,const QString& host = "ParkingClient", const QString& login = "root", const QString& password = "", int port = 3306);
-
+    void closeConnection();
 protected:
     DatabaseManager();
     DatabaseManager& operator=(const DatabaseManager& rhs);

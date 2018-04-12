@@ -13,6 +13,7 @@ SettingsDialog::SettingsDialog(SettingsDialog::ServerSettings server,
 
     connect(ui->buttonBox, &QDialogButtonBox::accepted,
             this, &SettingsDialog::apply);
+    connect(ui->price_spin, &QSpinBox::valueChanged, [this](priceEdited){priceEdited=true;});
 }
 
 void SettingsDialog::apply(){
@@ -37,6 +38,7 @@ void SettingsDialog::setServerSettings(const SettingsDialog::ServerSettings serv
 void SettingsDialog::setPriceSettings(const SettingsDialog::PriceSettings price)
 {
     bPriceSettings = price;
+    ui->price_spin->setValue(bPriceSettings.price);
 }
 
 void SettingsDialog::updateSettings()
@@ -45,4 +47,6 @@ void SettingsDialog::updateSettings()
     bServerSettings.password = ui->server_password_line_edit->text();
     bServerSettings.port = ui->server_port_spin_box->value();
     bServerSettings.user = ui->server_login_line_edit->text();
+
+    bPriceSettings.price = ui->price_spin->value();
 }

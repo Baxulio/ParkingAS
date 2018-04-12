@@ -13,6 +13,7 @@ enum Replies{
 
     //exit replies
     WIEGAND_DEACTIVATED,
+    WIEGAND_ALREADY_DEACTIVATED,
     WIEGAND_NOT_REGISTERED      = -1,
 
 

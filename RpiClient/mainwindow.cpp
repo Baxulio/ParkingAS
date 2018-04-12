@@ -22,7 +22,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     bSettings(new SettingsDialog),
-    bWiegand(new Wiegand(this)),
+    bWiegand(new WiegandWiring(this)),
     bsocket(new QTcpSocket(this)),
     label(new QLabel(this)),
     bPrintDialog(new QPrintDialog(&bPrinter,this))
@@ -33,7 +33,7 @@ MainWindow::MainWindow(QWidget *parent) :
     readSettings();
     initActionsConnections();
 
-    connect(bWiegand, &Wiegand::onReadyRead, this, &MainWindow::wiegandCallback);
+    connect(bWiegand, &WiegandWiring::onReadyRead, this, &MainWindow::wiegandCallback);
     connect(bsocket, &QTcpSocket::readyRead, this, &MainWindow::readSocket);
     connect(bsocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error),
             this, &MainWindow::displaySocketError);
@@ -80,7 +80,8 @@ void MainWindow::makeConnection()
     //WIEGAND//
     ///////////
     if(!bWiegand->startWiegand(bSettings->wiegandSettings().gpio_0,
-                               bSettings->wiegandSettings().gpio_1)){
+                               bSettings->wiegandSettings().gpio_1,
+                               bSettings->wiegandSettings().bareerPin)){
         showStatusMessage("<font color='red'>Cannot Initialize Wiegand!");
         makeDisconnection();
         return;
@@ -106,7 +107,7 @@ void MainWindow::makeDisconnection()
     ui->actionDisconnect->setEnabled(false);
 }
 
-void MainWindow::wiegandCallback(int bits, quint32 value)
+void MainWindow::wiegandCallback(quint32 value)
 {
     ui->wiegand_label->setText(QString::number(value));
     if(bSettings->modeSettings().mode){
@@ -118,7 +119,7 @@ void MainWindow::wiegandCallback(int bits, quint32 value)
     }
     QByteArray Buffer;
     QDataStream out(&Buffer,QIODevice::WriteOnly);
-    out.setVersion(QDataStream::Qt_5_7);
+    out.setVersion(QDataStream::Qt_5_5);
 
     out<<false<<value;
 
@@ -131,7 +132,7 @@ void MainWindow::readSocket()
     QByteArray arr=bsocket->readAll();
 
     QDataStream in(&arr,QIODevice::ReadOnly);
-    in.setVersion(QDataStream::Qt_5_7);
+    in.setVersion(QDataStream::Qt_5_5);
 
     in.startTransaction();
 
@@ -196,6 +197,8 @@ void MainWindow::readSocket()
         showStatusMessage("<font color='red'>WIEGAND ID is not registered!");
         return;
     }
+
+    case Replies::WIEGAND_ALREADY_DEACTIVATED:
     case Replies::WIEGAND_DEACTIVATED:{
 
         QDateTime in_time;
@@ -317,7 +320,7 @@ void MainWindow::readSettings()
     SettingsDialog::WiegandSettings wiegand;
     wiegand.gpio_0 = settings.value("wiegand_gpio_0",quint8()).toUInt();
     wiegand.gpio_1 = settings.value("wiegand_gpio_1",quint8()).toUInt();
-
+    wiegand.bareerPin = settings.value("bareer_pin", quint8()).toUInt();
     bSettings->setWiegandSettings(wiegand);
 
     if(mode.mode){
@@ -352,13 +355,14 @@ void MainWindow::writeSettings()
     SettingsDialog::WiegandSettings wiegand = bSettings->wiegandSettings();
     settings.setValue("wiegand_gpio_0",wiegand.gpio_0);
     settings.setValue("wiegand_gpio_1",wiegand.gpio_1);
+    settings.setValue("bareer_pin",wiegand.bareerPin);
 }
 
 void MainWindow::setUpServer()
 {
     QByteArray Buffer;
     QDataStream out(&Buffer,QIODevice::WriteOnly);
-    out.setVersion(QDataStream::Qt_5_7);
+    out.setVersion(QDataStream::Qt_5_5);
 
     out<<true
       <<bSettings->modeSettings().bareerNumber

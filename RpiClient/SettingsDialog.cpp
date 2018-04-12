@@ -60,6 +60,7 @@ void SettingsDialog::setWiegandSettings(const SettingsDialog::WiegandSettings wi
     bWiegandSettings=wiegand;
     ui->gpio_0_spin->setValue(bWiegandSettings.gpio_0);
     ui->gpio_1_spin->setValue(bWiegandSettings.gpio_1);
+    ui->bareerPin->setValue(bWiegandSettings.bareerPin);
 }
 
 void SettingsDialog::updateSettings()
@@ -80,4 +81,5 @@ void SettingsDialog::updateSettings()
 
     bWiegandSettings.gpio_0 = ui->gpio_0_spin->value();
     bWiegandSettings.gpio_1 = ui->gpio_1_spin->value();
+    bWiegandSettings.bareerPin = ui->bareerPin->value();
 }

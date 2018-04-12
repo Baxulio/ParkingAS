@@ -13,11 +13,13 @@
 
 #include <QDateTime>
 #include <QSqlError>
+#include <QSqlQuery>
 #include "ProxyModel.h"
 
 #include <QPainter>
 #include <QImage>
 #include <QPixmap>
+#include <QTextDocument>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -89,17 +91,65 @@ void MainWindow::makeConnection()
     ui->actionConnect->setEnabled(false);
     showStatusMessage("<font color='green'>Successfully connected!");
 
+    if(bSettings->isPriceEdited()){
+        QSqlQuery query();
+        if(!query.exec(QString("INSERT INTO `Parking`.`Price`(`price_per_hour`)"
+                           "VALUES (%1);").arg(bSettings->priceSettings().price)))
+            showStatusMessage(QString("<font color = 'red'>%1").arg(query().lastError().driverText()));
+        else bSettings->setPriceEdited(false);
+    }
+
     emit on_status_combo_currentIndexChanged(ui->status_combo->currentIndex());
 }
 
 void MainWindow::makeDisconnection()
 {
+    mDb.closeConnection();
     ui->actionConnect->setEnabled(true);
 }
 
 void MainWindow::print()
 {
+    QString strStream;
+    QTextStream out(&strStream);
 
+    const int rowCount = ui->tableView->model()->rowCount();
+    const int columnCount = ui->tableView->model()->columnCount();
+
+    out <<  "<html>\n"
+        "<head>\n"
+        "<meta Content=\"Text/html; charset=Windows-1251\">\n"
+        <<  QString("<title>%1 : %2</title>\n").arg("Parking Automated System").arg(QDateTime::currentDateTime().toString());
+        <<  "</head>\n"
+        "<body bgcolor=#ffffff link=#5000A0>\n"
+        "<table border=1 cellspacing=0 cellpadding=2>\n";
+
+    // headers
+    out << "<thead><tr bgcolor=#f0f0f0>";
+    for (int column = 0; column < columnCount; column++)
+        if (!ui->tableView->isColumnHidden(column))
+            out << QString("<th>%1</th>").arg(ui->tableView->model()->headerData(column, Qt::Horizontal).toString());
+    out << "</tr></thead>\n";
+
+    // data table
+    for (int row = 0; row < rowCount; row++) {
+        out << "<tr>";
+        for (int column = 0; column < columnCount; column++) {
+            if (!ui->tableView->isColumnHidden(column)) {
+                QString data = ui->tableView->model()->data(ui->tableView->model()->index(row, column)).toString().simplified();
+                out << QString("<td bkcolor=0>%1</td>").arg((!data.isEmpty()) ? data : QString("&nbsp;"));
+            }
+        }
+        out << "</tr>\n";
+    }
+    out <<  "</table>\n"
+        "</body>\n"
+        "</html>\n";
+
+    QTextDocument document;
+    document.setHtml(strStream);
+
+    document.print(bPrinter);
 }
 
 void MainWindow::reloadSnapshot(const QModelIndex &index)

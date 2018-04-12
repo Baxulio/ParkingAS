@@ -20,10 +20,11 @@ public:
     };
 
     struct PriceSettings {
+        int price;
     };
 
     explicit SettingsDialog(ServerSettings server = ServerSettings{QString("ParkingServer"),QString("ParkingUser"),QString(""),quint32(3306)},
-                            PriceSettings price = PriceSettings{},
+                            PriceSettings price = PriceSettings{int(0)},
                             QWidget *parent = nullptr);
     ~SettingsDialog();
 
@@ -33,10 +34,15 @@ public:
     PriceSettings priceSettings() const {return bPriceSettings;}
     void setPriceSettings(const PriceSettings price);
 
+    bool isPriceEdited() const {return priceEdited;}
+    void setPriceEdited(bool b){priceEdited=b;}
+
 private:
     Ui::SettingsDialog *ui = nullptr;
     ServerSettings bServerSettings;
     PriceSettings bPriceSettings;
+
+    bool priceEdited;
 
 private slots:
     void apply();

@@ -2,7 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "wiegand.hpp"
+#include "WiegandWiring.h"
 #include <QAbstractSocket>
 
 namespace Ui {
@@ -23,7 +23,7 @@ private:
     SettingsDialog *bSettings;
     QLabel *label;
 
-    Wiegand *bWiegand;
+    WiegandWiring *bWiegand;
 
     QTcpSocket *bsocket;
     QDataStream in;

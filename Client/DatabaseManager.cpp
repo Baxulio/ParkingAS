@@ -23,7 +23,7 @@ DatabaseManager&DatabaseManager::instance()
 
 DatabaseManager::~DatabaseManager()
 {
-    mDatabase->close();
+    closeConnection();
 }
 
 QSqlError DatabaseManager::connect(const QString &path, const QString &host, const QString &login, const QString &password, int port)
@@ -36,6 +36,11 @@ QSqlError DatabaseManager::connect(const QString &path, const QString &host, con
         err = mDatabase->lastError();
     }
     return err;
+}
+
+void DatabaseManager::closeConnection()
+{
+    mDatabase->close();
 }
 
 DatabaseManager::DatabaseManager():
