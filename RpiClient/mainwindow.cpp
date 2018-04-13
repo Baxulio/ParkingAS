@@ -87,8 +87,8 @@ void MainWindow::makeConnection()
     //////////
   //  bsocket->connectToHost(bSettings->serverSettings().host,bSettings->serverSettings().port);
 
-   // ui->actionConnect->setEnabled(false);
-   // ui->actionDisconnect->setEnabled(true);
+   ui->actionConnect->setEnabled(false);
+   ui->actionDisconnect->setEnabled(true);
 
    // setUpServer();
 }

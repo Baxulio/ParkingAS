@@ -8,7 +8,15 @@
 #include <stdint.h>
 #include <sys/time.h>
 #include <signal.h>
-
+void interrupt_d0(void){
+    emit trigger.onTriggered_d0();
+}
+void interrupt_d1(void){
+    emit trigger.onTriggered_d1();
+}
+void interrupt_timeout(int p){
+    emit trigger.onTriggered_timeout(p);
+}
 #define WIEGANDMAXBITS 40
 
 /* Set some timeouts */
@@ -48,7 +56,7 @@ void WiegandWiring::reset_timeout_timer(long usec)
 int WiegandWiring::setup_wiegand_timeout_handler()
 {
     sigemptyset(&sa.sa_mask);
-    sa.sa_handler = &interrupt_timeout;
+    sa.sa_handler = interrupt_timeout;
     //sa.sa_flags = SA_SIGINFO;
 
     if (options.debug)
@@ -149,9 +157,9 @@ WiegandWiring::WiegandWiring(QObject *parent, int debug) :
     QObject(parent)
 {
     options.debug=debug;
-    connect(&trigger, &Trigger::onTriggered_d0, this, &WiegandWiring::d0_pulse);
-    connect(&trigger, &Trigger::onTriggered_d1, this, &WiegandWiring::d1_pulse);
-    connect(&trigger, &Trigger::onTriggered_timeout, this, &WiegandWiring::wiegand_timeout);
+    connect(&trigger, SIGNAL(onTriggered_d0()), this, SLOT(d0_pulse()));
+    connect(&trigger, SIGNAL(onTriggered_d1()), this, SLOT(d1_pulse()));
+    connect(&trigger, SIGNAL(onTriggered_timeout(int)), this, SLOT(wiegand_timeout(int)));
 }
 
 bool WiegandWiring::startWiegand(int d0pin, int d1pin, int bareerPin)
@@ -173,8 +181,8 @@ bool WiegandWiring::startWiegand(int d0pin, int d1pin, int bareerPin)
     pullUpDnControl(d0pin, PUD_OFF);
     pullUpDnControl(d1pin, PUD_OFF);
 
-    wiringPiISR(d0pin, INT_EDGE_FALLING, &interrupt_d0);
-    wiringPiISR(d1pin, INT_EDGE_FALLING, &interrupt_d1);
+    wiringPiISR(d0pin, INT_EDGE_FALLING, interrupt_d0);
+    wiringPiISR(d1pin, INT_EDGE_FALLING, interrupt_d1);
 
     wiegand_sequence_reset();
     return true;
@@ -196,6 +204,7 @@ bool WiegandWiring::openBareer()
     digitalWrite (options.bareerPin, HIGH); // On
    delay (500) ;		// mS
     digitalWrite (options.bareerPin, LOW) ; // Off
+return true;
 }
 
 /* Timeout from last bit read, sequence may be completed or stopped */

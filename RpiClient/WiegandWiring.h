@@ -4,25 +4,21 @@
 #include <QObject>
 #include <wiringPi.h>
 
-class Trigger{
+class Trigger: public QObject{
     Q_OBJECT
 signals:
     void onTriggered_d0();
     void onTriggered_d1();
-    void onTriggered_timeout();
+    void onTriggered_timeout(int p);
 };
 
 static Trigger trigger;
 
-void interrupt_d0(void){
-    emit trigger.onTriggered_d0();
-}
-void interrupt_d1(void){
-    emit trigger.onTriggered_d1();
-}
-void interrupt_timeout(int p){
-    emit trigger.onTriggered_timeout();
-}
+extern void interrupt_d0(void);
+
+extern void interrupt_d1(void);
+
+extern void interrupt_timeout(int p);
 
 struct wiegand_data {
     unsigned char p0, p1;       //parity 0 , parity 1
