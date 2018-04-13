@@ -81,16 +81,20 @@ void MainWindow::makeConnection()
         makeDisconnection();
         return;
     }
-
     //////////
     //SERVER//
     //////////
-  //  bsocket->connectToHost(bSettings->serverSettings().host,bSettings->serverSettings().port);
+    bsocket->connectToHost(bSettings->serverSettings().host,bSettings->serverSettings().port);
+    if(!bsocket->waitForConnected(5000)){
+        showStatusMessage(QString("<font color='red'>%1").arg(bsocket->errorString()));
+        makeDisconnection();
+        return;
+    }
+    ui->actionConnect->setEnabled(false);
+    ui->actionDisconnect->setEnabled(true);
 
-   ui->actionConnect->setEnabled(false);
-   ui->actionDisconnect->setEnabled(true);
+    setUpServer();
 
-   // setUpServer();
 }
 
 void MainWindow::makeDisconnection()
@@ -119,7 +123,8 @@ void MainWindow::wiegandCallback(quint32 value)
     out<<false<<value;
 
     bsocket->write(Buffer);
-    bsocket->waitForReadyRead();
+    if(!bsocket->waitForReadyRead())
+        showStatusMessage("<font color='red'>No reply");
 }
 
 void MainWindow::readSocket()
@@ -129,12 +134,16 @@ void MainWindow::readSocket()
     QDataStream in(&arr,QIODevice::ReadOnly);
     in.setVersion(QDataStream::Qt_5_5);
 
-    int replyNumber;
+    int replyNumber=Replies::INVALID;
     in >> replyNumber;
 
     switch (replyNumber)
     {
-    //Setting up
+    case Replies::INVALID:{
+        showStatusMessage("Try one more time!");
+        return;
+    }
+        //Setting up
     case Replies::DVR_ERROR:{
 
         showStatusMessage("<font color='red'>DVR Error");
@@ -150,18 +159,18 @@ void MainWindow::readSocket()
         //ENTER mode
     case Replies::WIEGAND_ALREADY_REGISTERED:{
         QDateTime in_time;
-        quint8 in_number;
+        quint8 in_number=-1;
         in>>in_time>>in_number;
-
+        if(!in_time.isValid() && in_number){
+            showStatusMessage("Try one more time!");
+            return;
+        }
 
         ui->enter_time_label->setText(in_time.toString());
         ui->enter_number_label->setText(QString::number(in_number));
 
         showStatusMessage("<font color='green'>WIEGAND ID is already registered!");
-
-        if(bWiegand->openBareer())
-            showStatusMessage("<font color='green'>Bareer opened!");
-
+        bWiegand->openBareer();
         return;
     }
     case Replies::SNAPSHOT_FAIL:{
@@ -172,8 +181,7 @@ void MainWindow::readSocket()
     case Replies::WIEGAND_REGISTERED:{
 
         showStatusMessage("<font color='green'>Successfully registered!");
-        if(bWiegand->openBareer())
-            showStatusMessage("<font color='green'>Bareer opened!");
+        bWiegand->openBareer();
         return;
     }
 
@@ -189,10 +197,14 @@ void MainWindow::readSocket()
 
         QDateTime in_time;
         QDateTime out_time;
-        quint8 in_number;
-        double price;
+        quint8 in_number = -1;
+        double price = -1;
 
         in>>in_time>>out_time>>in_number>>price;
+        if(!in_time.isValid() && !out_time.isValid() && in_number && price<0){
+            showStatusMessage("Try one more time!");
+            return;
+        }
 
         ui->enter_number_label->setText(QString::number(in_number));
         ui->enter_time_label->setText(in_time.toString());
@@ -355,5 +367,6 @@ void MainWindow::setUpServer()
     <<bSettings->dvrSettings().host;
 
     bsocket->write(Buffer);
-    bsocket->waitForReadyRead();
+    if(!bsocket->waitForReadyRead())
+        showStatusMessage("<font color='red'>No reply");
 }

@@ -2,6 +2,7 @@
 #define CORE_H
 
 enum Replies{
+    INVALID                     = -1,
     //settings replies
     SET_UP                      = 1,         //Successfully set up camera, bareer mode and number
     DVR_ERROR                   = -10,     //DVR Password or something else is incorrect
@@ -14,7 +15,7 @@ enum Replies{
     //exit replies
     WIEGAND_DEACTIVATED,
     WIEGAND_ALREADY_DEACTIVATED,
-    WIEGAND_NOT_REGISTERED      = -1,
+    WIEGAND_NOT_REGISTERED      = -2,
 
 
 };

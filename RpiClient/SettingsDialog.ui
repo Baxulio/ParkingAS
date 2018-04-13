@@ -23,7 +23,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>3</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="server_tab">
       <attribute name="title">
@@ -124,7 +124,7 @@
           <number>10</number>
          </property>
          <property name="value">
-          <number>3306</number>
+          <number>1234</number>
          </property>
         </widget>
        </item>
@@ -392,7 +392,7 @@
        <item row="3" column="1">
         <widget class="QSpinBox" name="bareerPin">
          <property name="maximum">
-          <number>35</number>
+          <number>40</number>
          </property>
          <property name="singleStep">
           <number>1</number>
