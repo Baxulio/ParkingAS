@@ -12,7 +12,7 @@ signals:
     void onTriggered_timeout();
 };
 
-static volatile Trigger trigger;
+static Trigger trigger;
 
 void interrupt_d0(void){
     emit trigger.onTriggered_d0();

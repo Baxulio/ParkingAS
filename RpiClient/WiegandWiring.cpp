@@ -149,9 +149,9 @@ WiegandWiring::WiegandWiring(QObject *parent, int debug) :
     QObject(parent)
 {
     options.debug=debug;
-    connect(trigger, &Trigger::onTriggered_d0, this, &WiegandWiring::d0_pulse);
-    connect(trigger, &Trigger::onTriggered_d1, this, &WiegandWiring::d1_pulse);
-    connect(trigger, &Trigger::onTriggered_timeout, this, &WiegandWiring::wiegand_timeout);
+    connect(&trigger, &Trigger::onTriggered_d0, this, &WiegandWiring::d0_pulse);
+    connect(&trigger, &Trigger::onTriggered_d1, this, &WiegandWiring::d1_pulse);
+    connect(&trigger, &Trigger::onTriggered_timeout, this, &WiegandWiring::wiegand_timeout);
 }
 
 bool WiegandWiring::startWiegand(int d0pin, int d1pin, int bareerPin)
