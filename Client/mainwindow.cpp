@@ -20,6 +20,7 @@
 #include <QImage>
 #include <QPixmap>
 #include <QTextDocument>
+#include <QTextStream>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -40,6 +41,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     proxyModel->setSourceModel(sourceModel);
     ui->tableView->setModel(proxyModel);
+
     connect(ui->tableView, &QTableView::clicked, this, &MainWindow::reloadSnapshot);
 
     makeConnection();
@@ -91,14 +93,6 @@ void MainWindow::makeConnection()
     ui->actionConnect->setEnabled(false);
     showStatusMessage("<font color='green'>Successfully connected!");
 
-    if(bSettings->isPriceEdited()){
-        QSqlQuery query();
-        if(!query.exec(QString("INSERT INTO `Parking`.`Price`(`price_per_hour`)"
-                           "VALUES (%1);").arg(bSettings->priceSettings().price)))
-            showStatusMessage(QString("<font color = 'red'>%1").arg(query().lastError().driverText()));
-        else bSettings->setPriceEdited(false);
-    }
-
     emit on_status_combo_currentIndexChanged(ui->status_combo->currentIndex());
 }
 
@@ -117,12 +111,12 @@ void MainWindow::print()
     const int columnCount = ui->tableView->model()->columnCount();
 
     out <<  "<html>\n"
-        "<head>\n"
-        "<meta Content=\"Text/html; charset=Windows-1251\">\n"
-        <<  QString("<title>%1 : %2</title>\n").arg("Parking Automated System").arg(QDateTime::currentDateTime().toString());
-        <<  "</head>\n"
-        "<body bgcolor=#ffffff link=#5000A0>\n"
-        "<table border=1 cellspacing=0 cellpadding=2>\n";
+            "<head>\n"
+            "<meta Content=\"Text/html; charset=Windows-1251\">\n"
+         <<  QString("<title>%1 : %2</title>\n").arg("Parking Automated System").arg(QDateTime::currentDateTime().toString())
+          <<  "</head>\n"
+              "<body bgcolor=#ffffff link=#5000A0>\n"
+              "<table border=1 cellspacing=0 cellpadding=2>\n";
 
     // headers
     out << "<thead><tr bgcolor=#f0f0f0>";
@@ -143,13 +137,13 @@ void MainWindow::print()
         out << "</tr>\n";
     }
     out <<  "</table>\n"
-        "</body>\n"
-        "</html>\n";
+            "</body>\n"
+            "</html>\n";
 
     QTextDocument document;
     document.setHtml(strStream);
 
-    document.print(bPrinter);
+    document.print(&bPrinter);
 }
 
 void MainWindow::reloadSnapshot(const QModelIndex &index)
@@ -174,6 +168,17 @@ void MainWindow::reloadSnapshot(const QModelIndex &index)
     }
 }
 
+void MainWindow::onPriceChanged(int value)
+{
+    if(!bSettings->isHidden())return;
+
+    QSqlQuery query;
+    if(!query.exec(QString("INSERT INTO `Parking`.`Price`(`price_per_hour`)"
+                           "VALUES (%1);").arg(value)))
+        showStatusMessage(QString("<font color = 'red'>%1").arg(query.lastError().driverText()));
+
+}
+
 void MainWindow::initActionsConnections()
 {
     connect(ui->actionQuit, &QAction::triggered, this, &MainWindow::close);
@@ -182,7 +187,7 @@ void MainWindow::initActionsConnections()
     connect(ui->actionConnect,&QAction::triggered, this, &MainWindow::makeConnection);
     connect(ui->actionPrint, &QAction::triggered, this, &MainWindow::print);
     connect(ui->actionPrinterSettings, &QAction::triggered, [this](){bPrintDialog->exec();});
-    connect(ui->status_combo, &QComboBox::currentIndexChanged, this, &MainWindow::statusChanged);
+    connect(bSettings, &SettingsDialog::priceChanged, this, &MainWindow::onPriceChanged);
 }
 
 void MainWindow::readSettings()
@@ -212,6 +217,7 @@ void MainWindow::readSettings()
     bSettings->setServerSettings(server);
 
     SettingsDialog::PriceSettings price;
+    price.price = settings.value("price",int()).toInt();
     bSettings->setPriceSettings(price);
 }
 
@@ -227,6 +233,7 @@ void MainWindow::writeSettings()
     settings.setValue("server_port", server.port);
 
     SettingsDialog::PriceSettings price = bSettings->priceSettings();
+    settings.setValue("price",price.price);
 
     settings.setValue("mode",ui->status_combo->currentIndex());
 }
@@ -235,23 +242,6 @@ void MainWindow::on_in_from_dateTime_dateTimeChanged(const QDateTime &dateTime)
 {
     proxyModel->setFilterIn_Time_From(dateTime);
     ui->in_to_dateTime->setDateTime(dateTime);
-}
-
-void MainWindow::on_on_from_dateTime_dateTimeChanged(const QDateTime &dateTime)
-{
-    proxyModel->setFilterOut_Time_From(dateTime);
-    ui->out_to_dateTime->setDateTime(dateTime);
-}
-
-void MainWindow::statusChanged(int index)
-{
-    index?sourceModel->setTable("Active"):sourceModel->setTable("History");
-
-    if(!sourceModel->select()){
-        showStatusMessage(QString("<font color='red'>%1").arg(sourceModel->lastError().driverText()));
-        makeDisconnection();
-        return;
-    }
 }
 
 void MainWindow::on_wiegand_id_spin_valueChanged(int arg1)
@@ -277,4 +267,34 @@ void MainWindow::on_in_spin_valueChanged(int arg1)
 void MainWindow::on_out_spin_valueChanged(int arg1)
 {
     proxyModel->setFilterOut(arg1);
+}
+
+void MainWindow::on_status_combo_currentIndexChanged(int index)
+{
+    if(ui->actionConnect->isEnabled())return;
+    index?sourceModel->setTable("Active"):sourceModel->setTable("History");
+
+    if(!sourceModel->select()){
+        showStatusMessage(QString("<font color='red'>%1").arg(sourceModel->lastError().driverText()));
+        makeDisconnection();
+        return;
+    }
+    proxyModel->setHeaders();
+}
+
+void MainWindow::on_out_from_dateTime_dateTimeChanged(const QDateTime &dateTime)
+{
+    proxyModel->setFilterOut_Time_From(dateTime);
+    ui->out_to_dateTime->setDateTime(dateTime);
+}
+
+void MainWindow::on_clear_button_clicked()
+{
+    ui->wiegand_id_spin->setValue(0);
+    ui->in_spin->setValue(0);
+    ui->out_spin->setValue(0);
+    ui->in_from_dateTime->setDateTime(QDateTime());
+//    ui->in_to_dateTime->setDateTime(QDateTime());
+//    ui->out_to_dateTime->setDateTime(QDateTime());
+    ui->out_from_dateTime->setDateTime(QDateTime());
 }

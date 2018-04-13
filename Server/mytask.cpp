@@ -26,12 +26,14 @@ MyTask::MyTask(quint32 wiegand, QString dvrip, quint8 bareerNo, bool bareerMode,
     bLoginId(loginId)
 {
     qDebug() << "MyTask()";
+    cFileName="/home/bahman/Pictures/Parking/201846_21223.jpeg";
 }
 
 void MyTask::run()
 {
     QSqlQuery query;
-    query.prepare("SELECT `Active`.`id`,`Active`.`in_time`,`Active`.`in_number`,`Active`.`img` FROM `Parking`.`Active` WHERE `Active`.`rf_id`=:rf_id");
+    query.prepare("SELECT `Active`.`id`,`Active`.`in_time`,`Active`.`in_number`,`Active`.`img` "
+                  "FROM `Parking`.`Active` WHERE `Active`.`rf_id`=:rf_id");
     query.bindValue(":rf_id",bWiegand);
     if(!query.exec()){
         qDebug()<<query.lastError().databaseText();
@@ -48,12 +50,13 @@ void MyTask::run()
             return;
         }
 
-        if(!snapshot()){
-            emit Result(Replies::SNAPSHOT_FAIL);
-            return;
-        }
+//        if(!snapshot()){
+//            emit Result(Replies::SNAPSHOT_FAIL);
+//            return;
+//        }
 
-        query.prepare("INSERT INTO `Parking`.`Active`(`rf_id`, `in_time`, `in_number`, `img`) VALUES(:b_rf_id,:b_in_time,:b_in_number,:b_img);");
+        query.prepare("INSERT INTO `Parking`.`Active`(`rf_id`, `in_time`, `in_number`, `img`) "
+                      "VALUES(:b_rf_id,:b_in_time,:b_in_number,:b_img);");
         query.bindValue(":b_rf_id",bWiegand);
         query.bindValue(":b_in_time",QDateTime::currentDateTime());
         query.bindValue(":b_in_number", bBareerNo);
@@ -70,7 +73,9 @@ void MyTask::run()
     /////EXIT
     else {
         if(!query.isValid()){
-            if(!query.exec("SELECT in_time, in_number, out_time, price FROM History WHERE out_time >= DATE_SUB(NOW() , INTERVAL 1 MINUTE)")){
+            if(!query.exec("SELECT in_time, in_number, out_time, price "
+                           "FROM History "
+                           "WHERE out_time >= DATE_SUB(NOW() , INTERVAL 1 MINUTE)")){
                 qDebug()<<query.lastError().driverText();
                 return;
             }
@@ -86,12 +91,12 @@ void MyTask::run()
                         query.value("price").toDouble());
             return;
         }
-        if(!snapshot()){
-            emit Result(Replies::SNAPSHOT_FAIL);
-            return;
-        }
+//        if(!snapshot()){
+//            emit Result(Replies::SNAPSHOT_FAIL);
+//            return;
+//        }
 
-        QSqlDatabase::database.transaction();
+        QSqlDatabase::database().transaction();
         //////////////////////////////
         /// MOVE TO HISTORY //////////
         /// //////////////////////////
@@ -124,10 +129,10 @@ void MyTask::run()
         query.bindValue(":b_img_out", cFileName);
         query.bindValue(":b_price", price);
         query.exec();
+
         int b_last_insert_id=query.lastInsertId().toInt();
 
-        query.prepare("DELETE FROM `Parking`.`Active`"
-                      "WHERE  `id`=:b_id;");
+        query.prepare("DELETE FROM `Parking`.`Active` WHERE `id`=:b_id;");
         query.bindValue(":b_id",b_id);
         query.exec();
 
@@ -148,7 +153,7 @@ void MyTask::run()
         /// END MOVE TO HISTORY ///////
         /// ///////////////////////////
         if(!QSqlDatabase::database().commit()){
-            qDebug()<<QSqlDatabase::lastError().driverText();
+            qDebug()<<QSqlDatabase::database().lastError().driverText();
             return;
         }
 

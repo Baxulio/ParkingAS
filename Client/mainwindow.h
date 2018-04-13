@@ -45,11 +45,9 @@ private slots:
 
     void print();
     void reloadSnapshot(const QModelIndex &index);
-    void on_status_combo_currentIndexChanged(int index);
+    void onPriceChanged(int value);
 
     void on_in_from_dateTime_dateTimeChanged(const QDateTime &dateTime);
-
-    void on_on_from_dateTime_dateTimeChanged(const QDateTime &dateTime);
 
     void on_wiegand_id_spin_valueChanged(int arg1);
 
@@ -60,6 +58,12 @@ private slots:
     void on_in_spin_valueChanged(int arg1);
 
     void on_out_spin_valueChanged(int arg1);
+
+    void on_status_combo_currentIndexChanged(int index);
+
+    void on_out_from_dateTime_dateTimeChanged(const QDateTime &dateTime);
+
+    void on_clear_button_clicked();
 
 private:
     void initActionsConnections();

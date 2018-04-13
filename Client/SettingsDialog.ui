@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>278</width>
-    <height>247</height>
+    <width>258</width>
+    <height>233</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -134,7 +134,28 @@
       <attribute name="title">
        <string>Price</string>
       </attribute>
-      <layout class="QFormLayout" name="formLayout_4"/>
+      <layout class="QFormLayout" name="formLayout_4">
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_5">
+         <property name="text">
+          <string>У,Е / час</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QSpinBox" name="price_spin">
+         <property name="maximum">
+          <number>100000</number>
+         </property>
+         <property name="singleStep">
+          <number>100</number>
+         </property>
+         <property name="value">
+          <number>3000</number>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </widget>
    </item>

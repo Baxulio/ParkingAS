@@ -17,6 +17,7 @@ public:
     void setFilterIn_Time_To(const QDateTime &time);
     void setFilterOut_Time_From(const QDateTime &time);
     void setFilterOut_Time_To(const QDateTime &time);
+    void setHeaders();
 
     // QSortFilterProxyModel interface
 protected:
@@ -33,7 +34,6 @@ private:
     quint32 rf_id;
     quint8 in;
     quint8 out;
-
 };
 
 #endif // PROXYMODEL_H

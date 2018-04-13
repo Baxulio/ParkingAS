@@ -13,7 +13,6 @@ SettingsDialog::SettingsDialog(SettingsDialog::ServerSettings server,
 
     connect(ui->buttonBox, &QDialogButtonBox::accepted,
             this, &SettingsDialog::apply);
-    connect(ui->price_spin, &QSpinBox::valueChanged, [this](priceEdited){priceEdited=true;});
 }
 
 void SettingsDialog::apply(){
@@ -49,4 +48,9 @@ void SettingsDialog::updateSettings()
     bServerSettings.user = ui->server_login_line_edit->text();
 
     bPriceSettings.price = ui->price_spin->value();
+}
+
+void SettingsDialog::on_price_spin_valueChanged(int arg1)
+{
+    emit priceChanged(arg1);
 }

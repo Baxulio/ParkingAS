@@ -332,111 +332,77 @@
       <attribute name="title">
        <string>Wiegand </string>
       </attribute>
-      <widget class="QLabel" name="label_10">
-       <property name="geometry">
-        <rect>
-         <x>9</x>
-         <y>9</y>
-         <width>44</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>GPIO_0</string>
-       </property>
-       <property name="buddy">
-        <cstring>server_port_spin_box</cstring>
-       </property>
-      </widget>
-      <widget class="QSpinBox" name="gpio_0_spin">
-       <property name="geometry">
-        <rect>
-         <x>59</x>
-         <y>9</y>
-         <width>47</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="maximum">
-        <number>35</number>
-       </property>
-       <property name="singleStep">
-        <number>1</number>
-       </property>
-       <property name="value">
-        <number>14</number>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_11">
-       <property name="geometry">
-        <rect>
-         <x>9</x>
-         <y>38</y>
-         <width>44</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>GPIO_1</string>
-       </property>
-       <property name="buddy">
-        <cstring>server_port_spin_box</cstring>
-       </property>
-      </widget>
-      <widget class="QSpinBox" name="gpio_1_spin">
-       <property name="geometry">
-        <rect>
-         <x>59</x>
-         <y>38</y>
-         <width>47</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="maximum">
-        <number>35</number>
-       </property>
-       <property name="singleStep">
-        <number>1</number>
-       </property>
-       <property name="value">
-        <number>15</number>
-       </property>
-      </widget>
-      <widget class="QSpinBox" name="bareerPin">
-       <property name="geometry">
-        <rect>
-         <x>100</x>
-         <y>80</y>
-         <width>47</width>
-         <height>23</height>
-        </rect>
-       </property>
-       <property name="maximum">
-        <number>35</number>
-       </property>
-       <property name="singleStep">
-        <number>1</number>
-       </property>
-       <property name="value">
-        <number>0</number>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_12">
-       <property name="geometry">
-        <rect>
-         <x>50</x>
-         <y>90</y>
-         <width>44</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Bareer Pin</string>
-       </property>
-       <property name="buddy">
-        <cstring>server_port_spin_box</cstring>
-       </property>
-      </widget>
+      <layout class="QFormLayout" name="formLayout_3">
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_10">
+         <property name="text">
+          <string>GPIO_0</string>
+         </property>
+         <property name="buddy">
+          <cstring>server_port_spin_box</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QSpinBox" name="gpio_0_spin">
+         <property name="maximum">
+          <number>35</number>
+         </property>
+         <property name="singleStep">
+          <number>1</number>
+         </property>
+         <property name="value">
+          <number>29</number>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_11">
+         <property name="text">
+          <string>GPIO_1</string>
+         </property>
+         <property name="buddy">
+          <cstring>server_port_spin_box</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QSpinBox" name="gpio_1_spin">
+         <property name="maximum">
+          <number>35</number>
+         </property>
+         <property name="singleStep">
+          <number>1</number>
+         </property>
+         <property name="value">
+          <number>28</number>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="label_12">
+         <property name="text">
+          <string>BARRIER PIN</string>
+         </property>
+         <property name="buddy">
+          <cstring>server_port_spin_box</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QSpinBox" name="bareerPin">
+         <property name="maximum">
+          <number>35</number>
+         </property>
+         <property name="singleStep">
+          <number>1</number>
+         </property>
+         <property name="value">
+          <number>0</number>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </widget>
    </item>

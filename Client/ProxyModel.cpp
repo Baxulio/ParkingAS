@@ -4,7 +4,6 @@ ProxyModel::ProxyModel(QObject *parent):
     QSortFilterProxyModel (parent),
     in(0),out(0),rf_id(0)
 {
-
 }
 
 void ProxyModel::setFilterRf_Id(const quint32 &id)
@@ -39,8 +38,8 @@ void ProxyModel::setFilterIn_Time_To(const QDateTime &time)
 
 void ProxyModel::setFilterOut_Time_From(const QDateTime &time)
 {
- out_time_from=time;
- invalidateFilter();
+    out_time_from=time;
+    invalidateFilter();
 }
 
 void ProxyModel::setFilterOut_Time_To(const QDateTime &time)
@@ -49,12 +48,29 @@ void ProxyModel::setFilterOut_Time_To(const QDateTime &time)
     invalidateFilter();
 }
 
+void ProxyModel::setHeaders()
+{
+    for(int col=0; col<this->columnCount(); col++) {
+        QString header = this->headerData(col,Qt::Horizontal,Qt::DisplayRole).toString();
+
+        header=="rf_id"?setHeaderData(col,Qt::Horizontal,"Код карты"):
+        header=="in_time"?setHeaderData(col,Qt::Horizontal,"Время въезда"):
+        header=="in_number"?setHeaderData(col,Qt::Horizontal,"Въезд №"):
+        header=="out_time"?setHeaderData(col,Qt::Horizontal,"Время выезда"):
+        header=="out_number"?setHeaderData(col,Qt::Horizontal,"Выезд №"):
+        header=="price"?setHeaderData(col,Qt::Horizontal,"Цена"):NULL;
+    }
+}
+
 bool ProxyModel::filterAcceptsRow(int source_row, const QModelIndex &source_parent) const
 {
     if(rf_id && sourceModel()->data(sourceModel()->index(source_row, 1, source_parent)).toInt()!=rf_id)
         return false;
-    if(in && sourceModel()->data(sourceModel()->index(source_row, 4, source_parent)).toInt()!=in)
+
+    int in_col = sourceModel()->headerData(4,Qt::Horizontal,Qt::DisplayRole).toString()=="in_number"?4:3;
+    if(in && sourceModel()->data(sourceModel()->index(source_row, in_col, source_parent)).toInt()!=in)
         return false;
+
     if(out && sourceModel()->data(sourceModel()->index(source_row, 5, source_parent)).toInt()!=out)
         return false;
 
@@ -69,7 +85,9 @@ bool ProxyModel::filterAcceptsRow(int source_row, const QModelIndex &source_pare
 
 bool ProxyModel::filterAcceptsColumn(int source_column, const QModelIndex &source_parent) const
 {
-    if(source_column == 0 || source_column==7 || source_column == 8)
+    QString header = sourceModel()->headerData(source_column,Qt::Horizontal,Qt::DisplayRole).toString();
+
+    if(header == "id" || header=="img" || header=="img_out")
         return false;
     return true;
 }

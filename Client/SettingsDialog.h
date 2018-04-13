@@ -33,22 +33,20 @@ public:
 
     PriceSettings priceSettings() const {return bPriceSettings;}
     void setPriceSettings(const PriceSettings price);
-
-    bool isPriceEdited() const {return priceEdited;}
-    void setPriceEdited(bool b){priceEdited=b;}
-
 private:
     Ui::SettingsDialog *ui = nullptr;
     ServerSettings bServerSettings;
     PriceSettings bPriceSettings;
 
-    bool priceEdited;
-
 private slots:
     void apply();
 
+    void on_price_spin_valueChanged(int arg1);
+
 private:
     void updateSettings();
+signals:
+    void priceChanged(int value);
 };
 
 #endif // SETTINGSDIALOG_H
