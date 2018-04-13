@@ -4,17 +4,11 @@
 #include <QSettings>
 #include <QDesktopWidget>
 #include <QCloseEvent>
-#include <QLabel>
+
 #include <QMessageBox>
 #include <QDateTime>
 
-#include <QPrinter>
-#include <QPrintDialog>
 #include <QPainter>
-
-#include <QTcpSocket>
-
-#include "SettingsDialog.h"
 
 #include "../core.h"
 
@@ -24,8 +18,7 @@ MainWindow::MainWindow(QWidget *parent) :
     bSettings(new SettingsDialog),
     bWiegand(new WiegandWiring(this)),
     bsocket(new QTcpSocket(this)),
-    label(new QLabel(this)),
-    bPrintDialog(new QPrintDialog(&bPrinter,this))
+    label(new QLabel(this))
 {
     ui->setupUi(this);
     ui->statusBar->addPermanentWidget(label);
@@ -33,10 +26,12 @@ MainWindow::MainWindow(QWidget *parent) :
     readSettings();
     initActionsConnections();
 
+    bPrintDialog = new QPrintDialog(&bPrinter,this);
+
     connect(bWiegand, &WiegandWiring::onReadyRead, this, &MainWindow::wiegandCallback);
     connect(bsocket, &QTcpSocket::readyRead, this, &MainWindow::readSocket);
-    connect(bsocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error),
-            this, &MainWindow::displaySocketError);
+    //connect(bsocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error),
+    //        this, &MainWindow::displaySocketError);
 }
 
 MainWindow::~MainWindow()
@@ -90,12 +85,12 @@ void MainWindow::makeConnection()
     //////////
     //SERVER//
     //////////
-    bsocket->connectToHost(bSettings->serverSettings().host,bSettings->serverSettings().port);
+  //  bsocket->connectToHost(bSettings->serverSettings().host,bSettings->serverSettings().port);
 
-    ui->actionConnect->setEnabled(false);
-    ui->actionDisconnect->setEnabled(true);
+   // ui->actionConnect->setEnabled(false);
+   // ui->actionDisconnect->setEnabled(true);
 
-    setUpServer();
+   // setUpServer();
 }
 
 void MainWindow::makeDisconnection()
@@ -134,8 +129,6 @@ void MainWindow::readSocket()
     QDataStream in(&arr,QIODevice::ReadOnly);
     in.setVersion(QDataStream::Qt_5_5);
 
-    in.startTransaction();
-
     int replyNumber;
     in >> replyNumber;
 
@@ -143,15 +136,13 @@ void MainWindow::readSocket()
     {
     //Setting up
     case Replies::DVR_ERROR:{
-        if(!in.commitTransaction())
-            return;
+
         showStatusMessage("<font color='red'>DVR Error");
         makeDisconnection();
         return;
     }
     case Replies::SET_UP:{
-        if(!in.commitTransaction())
-            return;
+
         showStatusMessage("<font color='green'>Successfully Set UP");
         return;
     }
@@ -162,8 +153,6 @@ void MainWindow::readSocket()
         quint8 in_number;
         in>>in_time>>in_number;
 
-        if(!in.commitTransaction())
-            return;
 
         ui->enter_time_label->setText(in_time.toString());
         ui->enter_number_label->setText(QString::number(in_number));
@@ -176,14 +165,12 @@ void MainWindow::readSocket()
         return;
     }
     case Replies::SNAPSHOT_FAIL:{
-        if(!in.commitTransaction())
-            return;
+
         showStatusMessage("<font color='red'>Snapshot failed! Please try again!");
         return;
     }
     case Replies::WIEGAND_REGISTERED:{
-        if(!in.commitTransaction())
-            return;
+
         showStatusMessage("<font color='green'>Successfully registered!");
         if(bWiegand->openBareer())
             showStatusMessage("<font color='green'>Bareer opened!");
@@ -192,8 +179,7 @@ void MainWindow::readSocket()
 
         //EXIT mode
     case Replies::WIEGAND_NOT_REGISTERED:{
-        if(!in.commitTransaction())
-            return;
+
         showStatusMessage("<font color='red'>WIEGAND ID is not registered!");
         return;
     }
@@ -207,8 +193,7 @@ void MainWindow::readSocket()
         double price;
 
         in>>in_time>>out_time>>in_number>>price;
-        if(!in.commitTransaction())
-            return;
+
         ui->enter_number_label->setText(QString::number(in_number));
         ui->enter_time_label->setText(in_time.toString());
         ui->exit_time_label->setText(out_time.toString());

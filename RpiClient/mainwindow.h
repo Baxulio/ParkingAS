@@ -5,15 +5,16 @@
 #include "WiegandWiring.h"
 #include <QAbstractSocket>
 
+#include <QPrinter>
+#include <QPrintDialog>
+
+#include <QTcpSocket>
+#include <QLabel>
+#include "SettingsDialog.h"
+
 namespace Ui {
 class MainWindow;
 }
-
-class QTcpSocket;
-class SettingsDialog;
-class QLabel;
-class QPrintDialog;
-class QPrinter;
 
 class MainWindow : public QMainWindow
 {
@@ -44,7 +45,7 @@ private slots:
     void showStatusMessage(const QString &message);
     void makeConnection();
     void makeDisconnection();
-    void wiegandCallback(int bits, quint32 value);
+    void wiegandCallback(quint32 value);
 
     void readSocket();
     void displaySocketError(QAbstractSocket::SocketError socketError);

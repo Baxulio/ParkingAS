@@ -9,8 +9,8 @@
 #include <sys/time.h>
 #include <signal.h>
 
-#include <wiringPi.h>
-
+typedef void (*function)(void);
+typedef void (*handler)(int);
 #define WIEGANDMAXBITS 40
 
 /* Set some timeouts */
@@ -50,7 +50,7 @@ void WiegandWiring::reset_timeout_timer(long usec)
 int WiegandWiring::setup_wiegand_timeout_handler()
 {
     sigemptyset(&sa.sa_mask);
-    sa.sa_handler = wiegand_timeout;
+    sa.sa_handler = (handler)&WiegandWiring::wiegand_timeout;
     //sa.sa_flags = SA_SIGINFO;
 
     if (options.debug)
@@ -114,7 +114,7 @@ void WiegandWiring::add_bit_w26(int bit)
                 fprintf(stderr, "Incorrect even parity bit (leftmost)\n");
             }
         }
-        else if (!(parity1 % 2) != wds.p1) {
+        else if ((!(parity1 % 2)) != wds.p1) {
             wds.code_valid = 0;
             if (options.debug) {
                 fprintf(stderr, "Incorrect odd parity bit (rightmost)\n");
@@ -169,11 +169,11 @@ bool WiegandWiring::startWiegand(int d0pin, int d1pin, int bareerPin)
     pinMode(d0pin, INPUT);
     pinMode(d1pin, INPUT);
 
-    pullUpOnControl(d0pin, PUD_OFF);
-    pullUpOnControl(d1pin, PUD_OFF);
+    pullUpDnControl(d0pin, PUD_OFF);
+    pullUpDnControl(d1pin, PUD_OFF);
 
-    wiringPiISR(d0pin, INT_EDGE_FALLING, d0_pulse);
-    wiringPiISR(d1pin, INT_EDGE_FALLING, d1_pulse);
+    wiringPiISR(d0pin, INT_EDGE_FALLING, (function)&WiegandWiring::d0_pulse);
+    wiringPiISR(d1pin, INT_EDGE_FALLING, &WiegandWiring::d1_pulse);
 
     wiegand_sequence_reset();
     return true;
@@ -182,24 +182,23 @@ bool WiegandWiring::startWiegand(int d0pin, int d1pin, int bareerPin)
 void WiegandWiring::cancel()
 {
     /*
-      Cancel the Wiegand decoder.
+      Cancel the Wiegand decoder.gpioTerminate();
    */
-    wiringPiISR(d0pin, 0, this);
-    wiringPiISR(d1pin, 0, this);
+    wiringPiISR(options.d0pin, 0, NULL);
+    wiringPiISR(options.d0pin, 0, NULL);
 
-    gpioTerminate();
+
 }
 
 bool WiegandWiring::openBareer()
 {
-    if(!digitalWrite (options.bareerPin, HIGH)) // On
-        return false;
-    delay (500) ;		// mS
+    digitalWrite (options.bareerPin, HIGH); // On
+   delay (500) ;		// mS
     digitalWrite (options.bareerPin, LOW) ; // Off
 }
 
 /* Timeout from last bit read, sequence may be completed or stopped */
-void WiegandWiring::wiegand_timeout()
+void WiegandWiring::wiegand_timeout(int p)
 {
     if (options.debug)
         fprintf(stderr, "wiegand_timeout()\n");
@@ -218,6 +217,7 @@ void WiegandWiring::d0_pulse()
         clock_gettime(CLOCK_MONOTONIC, &wbit_tm);
     }
     add_bit_w26(0);
+
 }
 
 void WiegandWiring::d1_pulse()
