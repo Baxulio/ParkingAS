@@ -4,6 +4,26 @@
 #include <QObject>
 #include <wiringPi.h>
 
+class Trigger{
+    Q_OBJECT
+signals:
+    void onTriggered_d0();
+    void onTriggered_d1();
+    void onTriggered_timeout();
+};
+
+static volatile Trigger trigger;
+
+void interrupt_d0(void){
+    emit trigger.onTriggered_d0();
+}
+void interrupt_d1(void){
+    emit trigger.onTriggered_d1();
+}
+void interrupt_timeout(int p){
+    emit trigger.onTriggered_timeout();
+}
+
 struct wiegand_data {
     unsigned char p0, p1;       //parity 0 , parity 1
     quint8 facility_code;
@@ -33,9 +53,6 @@ private:
      void add_bit_w26(int bit);
      unsigned long get_bit_timediff_ns();
 public:
-
-
-
     explicit WiegandWiring(QObject *parent = nullptr, int debug = 0);
 
     bool startWiegand(int d0pin = 29, int d1pin = 28, int bareerPin = 0);
