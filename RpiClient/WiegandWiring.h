@@ -4,7 +4,8 @@
 #include <QObject>
 #include <wiringPi.h>
 
-class Trigger{
+class Trigger : public QObject
+{
     Q_OBJECT
 signals:
     void onTriggered_d0();
