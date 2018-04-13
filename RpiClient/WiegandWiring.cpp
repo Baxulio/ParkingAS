@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include <sys/time.h>
 #include <signal.h>
+
 void interrupt_d0(void){
     emit trigger.onTriggered_d0();
 }
@@ -202,9 +203,9 @@ void WiegandWiring::cancel()
 bool WiegandWiring::openBareer()
 {
     digitalWrite (options.bareerPin, HIGH); // On
-   delay (500) ;		// mS
+    delay (500) ;		// mS
     digitalWrite (options.bareerPin, LOW) ; // Off
-return true;
+    return true;
 }
 
 /* Timeout from last bit read, sequence may be completed or stopped */
