@@ -16,7 +16,6 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     bSettings(new SettingsDialog),
-    bWiegand(new WiegandWiring(this)),
     bsocket(new QTcpSocket(this)),
     label(new QLabel(this))
 {
@@ -74,6 +73,7 @@ void MainWindow::makeConnection()
     ///////////
     //WIEGAND//
     ///////////
+    bWiegand = new WiegandWiring(this);
     if(!bWiegand->startWiegand(bSettings->wiegandSettings().gpio_0,
                                bSettings->wiegandSettings().gpio_1,
                                bSettings->wiegandSettings().bareerPin)){
@@ -99,7 +99,7 @@ void MainWindow::makeConnection()
 
 void MainWindow::makeDisconnection()
 {
-    bWiegand->cancel();
+    if(bWiegand)delete bWiegand;
     bsocket->abort();
 
     ui->actionConnect->setEnabled(true);
@@ -160,8 +160,10 @@ void MainWindow::readSocket()
     case Replies::WIEGAND_ALREADY_REGISTERED:{
         QDateTime in_time;
         quint8 in_number=-1;
-        in>>in_time>>in_number;
-        if(!in_time.isValid() && in_number){
+        try{
+            in>>in_time>>in_number;
+        }
+        catch(...){
             showStatusMessage("Try one more time!");
             return;
         }
@@ -200,8 +202,10 @@ void MainWindow::readSocket()
         quint8 in_number = -1;
         double price = -1;
 
-        in>>in_time>>out_time>>in_number>>price;
-        if(!in_time.isValid() && !out_time.isValid() && in_number && price<0){
+        try{
+            in>>in_time>>out_time>>in_number>>price;
+        }
+        catch(...){
             showStatusMessage("Try one more time!");
             return;
         }

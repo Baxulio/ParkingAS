@@ -33,7 +33,7 @@ void MyTask::run()
 {
     QSqlQuery query;
     query.prepare("SELECT `Active`.`id`,`Active`.`in_time`,`Active`.`in_number`,`Active`.`img` "
-                  "FROM `Parking`.`Active` WHERE `Active`.`rf_id`=:rf_id");
+                  "FROM `Parking`.`Active` WHERE `Active`.`rf_id`=:rf_id;");
     query.bindValue(":rf_id",bWiegand);
     if(!query.exec()){
         qDebug()<<query.lastError().databaseText();
@@ -118,11 +118,11 @@ void MyTask::run()
             price += secs<=5?(secs-1)*1000:
                              4000;
         }
-        query.prepare("INSERT INTO `Parking`.`History` (`rf_id`, `in_time`, `out_time`, `in_number`, `out_number`, `price`, `img`, `img_out`)"
-                      "VALUES (:b_rf_id, :b_in_time, :b_out_time, :b_in_number, :b_out_number, :b_price, :b_img, b_img_out);");
+        query.prepare("INSERT INTO `Parking`.`History`(`rf_id`, `in_time`, `out_time`, `in_number`, `out_number`, `price`, `img`, `img_out`) "
+                      "VALUES(:b_rf_id, :b_in_time, :b_out_time, :b_in_number, :b_out_number, :b_price, :b_img, :b_img_out);");
         query.bindValue(":b_rf_id",bWiegand);
         query.bindValue(":b_in_time",b_in_time);
-        query.bindValue("b_out_time",QDateTime::currentDateTime());
+        query.bindValue(":b_out_time",QDateTime::currentDateTime());
         query.bindValue(":b_in_number",b_in_number);
         query.bindValue(":b_out_number", bBareerNo);
         query.bindValue(":b_img",b_img);
@@ -135,7 +135,15 @@ void MyTask::run()
         query.prepare("DELETE FROM `Parking`.`Active` WHERE `id`=:b_id;");
         query.bindValue(":b_id",b_id);
         query.exec();
-
+        ///
+        ///////////////////////////////
+        /// END MOVE TO HISTORY ///////
+        /// ///////////////////////////
+        if(!QSqlDatabase::database().commit()){
+            emit Result(Replies::INVALID);
+            qDebug()<<QSqlDatabase::database().lastError().driverText();
+            return;
+        }
         query.prepare("SELECT `in_time`, `out_time`, `in_number`, `price`"
                       "FROM `Parking`.`History`"
                       "WHERE `id` = :b_last_insert_id;");
@@ -147,16 +155,6 @@ void MyTask::run()
                     query.value("in_number").toUInt(),
                     query.value("out_time").toDateTime(),
                     query.value("price").toDouble());
-
-        ///
-        ///////////////////////////////
-        /// END MOVE TO HISTORY ///////
-        /// ///////////////////////////
-        if(!QSqlDatabase::database().commit()){
-            qDebug()<<QSqlDatabase::database().lastError().driverText();
-            return;
-        }
-
     }
 }
 

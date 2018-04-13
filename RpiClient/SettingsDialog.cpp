@@ -41,7 +41,10 @@ void SettingsDialog::setServerSettings(const SettingsDialog::ServerSettings serv
 void SettingsDialog::setModeSettings(const SettingsDialog::ModeSettings mode)
 {
     bModeSettings = mode;
-    ui->enterRadio->setChecked(bModeSettings.mode);
+    if(bModeSettings.mode)
+        ui->enterRadio->setChecked(true);
+    else ui->exitRadio->setChecked(true);
+
     ui->barrier_number_spin->setValue(bModeSettings.bareerNumber);
 }
 

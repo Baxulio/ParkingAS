@@ -23,7 +23,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="server_tab">
       <attribute name="title">
@@ -172,6 +172,9 @@
            <widget class="QRadioButton" name="enterRadio">
             <property name="text">
              <string>Enter</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
