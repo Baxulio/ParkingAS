@@ -4,16 +4,7 @@
 #include <QObject>
 #include <wiringPi.h>
 
-class Trigger : public QObject
-{
-    Q_OBJECT
-signals:
-    void onTriggered_d0();
-    void onTriggered_d1();
-    void onTriggered_timeout(int p);
-};
-
-static Trigger trigger;
+z
 
 extern void interrupt_d0(void);
 

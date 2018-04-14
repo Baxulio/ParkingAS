@@ -194,10 +194,10 @@ void loooooop(const char &siteCode){
         }
         else {
             emit trigger.onTriggered_UnknownFormat("<font color='red'>Unknown format of Wiegand!")
-            // Other formats to be added later.
-            //printf ("Unknown format\n") ; fflush (stdout) ;
-            //printf ("Wiegand Counter = %d\n", wiegand_counter) ; fflush (stdout) ;
-            //printf ("Flag done = %d\n", flagDone) ; fflush (stdout) ;
+                    // Other formats to be added later.
+                    //printf ("Unknown format\n") ; fflush (stdout) ;
+                    //printf ("Wiegand Counter = %d\n", wiegand_counter) ; fflush (stdout) ;
+                    //printf ("Flag done = %d\n", flagDone) ; fflush (stdout) ;
         }
         // cleanup and get ready for the next card
         bitCount = 0;
@@ -236,7 +236,7 @@ int main(int argc, char *argv[])
           QObject::disconnect(&trigger, SIGNAL(onTriggered_timeout()));
     })
 
-    QObject::connect(&trigger, SIGNAL(onTriggered_ShowCode(quint32)),&w, SLOT(wiegandCallback(quint32)));
+            QObject::connect(&trigger, SIGNAL(onTriggered_ShowCode(quint32)),&w, SLOT(wiegandCallback(quint32)));
     QObject::connect(&trigger, SIGNAL(onTriggered_UnknownFormat(QString)),&w,SLOT(showStatusMessage(QString)));
 
     return app.exec();
