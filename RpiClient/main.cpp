@@ -30,5 +30,9 @@ int main(int argc, char *argv[])
     MainWindow w;
     w.show();
 
+    QObject::connect(&w, &MainWindow::connected, [](bool b){
+       b?QObject::connect(&trigger, &Trigger::trigger_show_code, &w, &MainWindow::wiegandCallback):
+         QObject::disconnect(&trigger, &Trigger::trigger_show_code, NULL, NULL);
+    });
     return app.exec();
 }

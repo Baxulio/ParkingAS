@@ -12,7 +12,6 @@
 
 #include "../core.h"
 #include <QDebug>
-#include "WiegandWiring.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -89,7 +88,8 @@ void MainWindow::makeConnection()
 }
 
 void MainWindow::makeDisconnection()
-{ emit connected(false);
+{
+    emit connected(false);
     bsocket->abort();
 
     ui->actionConnect->setEnabled(true);
