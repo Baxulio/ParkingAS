@@ -24,6 +24,16 @@ static unsigned int wiegand_counter;        // countdown until we assume there a
 static unsigned long facilityCode=0;        // decoded facility code
 static unsigned long cardCode=0;            // decoded card code
 
+class Trigger : public QObject
+{
+    Q_OBJECT
+signals:
+    void onTriggered_ShowCode(quint32 value);
+    void onTriggered_timeout();
+    void onTriggered_UnknownFormat(const QString &str);
+};
+
+static Trigger trigger;
 
 PI_THREAD (waitForData0)
 {
@@ -90,7 +100,7 @@ void printBits()
 
 ////////// LOOOOOOOOOOOP
 ///
-void loooooop(const char &siteCode, const MainWindow &mainWin, const QTimer &timer){
+void loooooop(const char &siteCode){
     char useSiteCode = siteCode; // determines whether or no to use 26 bit site code.
 
     // This waits to make sure that there have been no more data pulses before processing data
@@ -116,7 +126,7 @@ void loooooop(const char &siteCode, const MainWindow &mainWin, const QTimer &tim
             }
 
             //printBits();
-            mainWin.wiegandCallback(cardCode);
+            emit trigger.onTriggered_ShowCode(cardCode);
         }
 
         else if (bitCount == 26 & useSiteCode == 'Y')
@@ -137,7 +147,7 @@ void loooooop(const char &siteCode, const MainWindow &mainWin, const QTimer &tim
             }
 
             //printBits();
-            mainWin.wiegandCallback(cardCode);
+            emit trigger.onTriggered_ShowCode(cardCode);
         }
 
         // 35 bit HID Corporate 1000 format
@@ -159,7 +169,7 @@ void loooooop(const char &siteCode, const MainWindow &mainWin, const QTimer &tim
             }
 
             //printBits();
-            mainWin.wiegandCallback(cardCode);
+            emit trigger.onTriggered_ShowCode(cardCode);
         }
         //HID Proprietary 37 Bit Format with Facility Code: H10304
         else if (bitCount == 37)
@@ -180,10 +190,10 @@ void loooooop(const char &siteCode, const MainWindow &mainWin, const QTimer &tim
             }
 
             //printBits();
-            mainWin.wiegandCallback(cardCode);
+            emit trigger.onTriggered_ShowCode(cardCode);
         }
         else {
-            mainWin.showStatusMessage("<font color='red'>Unknown format of Wiegand!");
+            emit trigger.onTriggered_UnknownFormat("<font color='red'>Unknown format of Wiegand!")
             // Other formats to be added later.
             //printf ("Unknown format\n") ; fflush (stdout) ;
             //printf ("Wiegand Counter = %d\n", wiegand_counter) ; fflush (stdout) ;
@@ -197,7 +207,7 @@ void loooooop(const char &siteCode, const MainWindow &mainWin, const QTimer &tim
         {
             databits[i] = 0;
         }
-        emit timer.timeout();
+        emit trigger.onTriggered_timeout();
     }
 }
 //////////END LOOOOOOOOOOOOOOOOP//////
@@ -221,8 +231,13 @@ int main(int argc, char *argv[])
     MainWindow w;
     w.show();
 
-    QTimer timer;
-    QObject::connect(&timer, SIGNAL(timeout()),loooooop('Y',w,timer));
+    QObject::connect(&w,SIGNAL(connected(bool)),[](bool b){
+        b?QObject::connect(&trigger, SIGNAL(onTriggered_timeout()),loooooop('N')):
+          QObject::disconnect(&trigger, SIGNAL(onTriggered_timeout()));
+    })
+
+    QObject::connect(&trigger, SIGNAL(onTriggered_ShowCode(quint32)),&w, SLOT(wiegandCallback(quint32)));
+    QObject::connect(&trigger, SIGNAL(onTriggered_UnknownFormat(QString)),&w,SLOT(showStatusMessage(QString)));
 
     return app.exec();
 }

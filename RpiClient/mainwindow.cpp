@@ -78,18 +78,14 @@ void MainWindow::makeConnection()
         makeDisconnection();
         return;
     }
-    ui->actionConnect->setEnabled(false);
-    ui->actionDisconnect->setEnabled(true);
-
+    emit connected(true);
     setUpServer();
 }
 
 void MainWindow::makeDisconnection()
 {
     bsocket->abort();
-
-    ui->actionConnect->setEnabled(true);
-    ui->actionDisconnect->setEnabled(false);
+    emit connected(false);
 }
 
 void MainWindow::wiegandCallback(quint32 value)
@@ -245,6 +241,12 @@ void MainWindow::print()
     painter.begin(&bPrinter);
     painter.drawText(100, 100, 500, 500, Qt::AlignLeft|Qt::AlignTop, text);
     painter.end();
+}
+
+void MainWindow::onConnectionState(bool b)
+{
+    ui->actionConnect->setEnabled(!b);
+    ui->actionDisconnect->setEnabled(b);
 }
 
 void MainWindow::initActionsConnections()
