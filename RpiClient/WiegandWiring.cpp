@@ -179,8 +179,8 @@ bool WiegandWiring::startWiegand(int d0pin, int d1pin, int bareerPin)
     pinMode(d0pin, INPUT);
     pinMode(d1pin, INPUT);
 
-    pullUpDnControl(d0pin, PUD_OFF);
-    pullUpDnControl(d1pin, PUD_OFF);
+    pullUpDnControl(d0pin, PUD_UP);
+    pullUpDnControl(d1pin, PUD_UP);
 
     wiringPiISR(d0pin, INT_EDGE_FALLING, interrupt_d0);
     wiringPiISR(d1pin, INT_EDGE_FALLING, interrupt_d1);
@@ -196,7 +196,6 @@ void WiegandWiring::cancel()
    */
     wiringPiISR(options.d0pin, 0, NULL);
     wiringPiISR(options.d0pin, 0, NULL);
-
 
 }
 

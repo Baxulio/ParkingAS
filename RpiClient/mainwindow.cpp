@@ -11,11 +11,12 @@
 #include <QPainter>
 
 #include "../core.h"
-
+#include <QDebug>
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     bSettings(new SettingsDialog),
+    bWiegand(new WiegandWiring(this)),
     bsocket(new QTcpSocket(this)),
     label(new QLabel(this))
 {
@@ -73,7 +74,6 @@ void MainWindow::makeConnection()
     ///////////
     //WIEGAND//
     ///////////
-    bWiegand = new WiegandWiring(this);
     if(!bWiegand->startWiegand(bSettings->wiegandSettings().gpio_0,
                                bSettings->wiegandSettings().gpio_1,
                                bSettings->wiegandSettings().bareerPin)){
@@ -99,7 +99,7 @@ void MainWindow::makeConnection()
 
 void MainWindow::makeDisconnection()
 {
-    if(bWiegand)delete bWiegand;
+    bWiegand->cancel();
     bsocket->abort();
 
     ui->actionConnect->setEnabled(true);
@@ -108,7 +108,8 @@ void MainWindow::makeDisconnection()
 
 void MainWindow::wiegandCallback(quint32 value)
 {
-    ui->wiegand_label->setText(QString::number(value));
+    const quint32 val=value;
+    ui->wiegand_label->setText(QString::number(val));
     if(bSettings->modeSettings().mode){
         ui->enter_number_label->setText(QString::number(bSettings->modeSettings().bareerNumber));
         ui->enter_time_label->setText(QDateTime::currentDateTime().toString());
@@ -120,11 +121,10 @@ void MainWindow::wiegandCallback(quint32 value)
     QDataStream out(&Buffer,QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_5_5);
 
-    out<<false<<value;
+    out<<false<<val;
 
     bsocket->write(Buffer);
-    if(!bsocket->waitForReadyRead())
-        showStatusMessage("<font color='red'>No reply");
+    if(!bsocket->waitForReadyRead())showStatusMessage("<font color='red'>No reply");
 }
 
 void MainWindow::readSocket()
@@ -134,16 +134,16 @@ void MainWindow::readSocket()
     QDataStream in(&arr,QIODevice::ReadOnly);
     in.setVersion(QDataStream::Qt_5_5);
 
-    int replyNumber=Replies::INVALID;
+    if(in.status()==QDataStream::ReadCorruptData){
+        showStatusMessage("Try one more time!");
+        return;
+    }
+    int replyNumber;
     in >> replyNumber;
 
     switch (replyNumber)
     {
-    case Replies::INVALID:{
-        showStatusMessage("Try one more time!");
-        return;
-    }
-        //Setting up
+    //Setting up
     case Replies::DVR_ERROR:{
 
         showStatusMessage("<font color='red'>DVR Error");
@@ -151,7 +151,6 @@ void MainWindow::readSocket()
         return;
     }
     case Replies::SET_UP:{
-
         showStatusMessage("<font color='green'>Successfully Set UP");
         return;
     }
@@ -159,14 +158,9 @@ void MainWindow::readSocket()
         //ENTER mode
     case Replies::WIEGAND_ALREADY_REGISTERED:{
         QDateTime in_time;
-        quint8 in_number=-1;
-        try{
-            in>>in_time>>in_number;
-        }
-        catch(...){
-            showStatusMessage("Try one more time!");
-            return;
-        }
+        quint8 in_number;
+
+        in>>in_time>>in_number;
 
         ui->enter_time_label->setText(in_time.toString());
         ui->enter_number_label->setText(QString::number(in_number));
@@ -196,20 +190,12 @@ void MainWindow::readSocket()
 
     case Replies::WIEGAND_ALREADY_DEACTIVATED:
     case Replies::WIEGAND_DEACTIVATED:{
-
         QDateTime in_time;
         QDateTime out_time;
-        quint8 in_number = -1;
-        double price = -1;
+        quint8 in_number;
+        double price;
 
-        try{
-            in>>in_time>>out_time>>in_number>>price;
-        }
-        catch(...){
-            showStatusMessage("Try one more time!");
-            return;
-        }
-
+        in>>in_time>>in_number>>out_time>>price;
         ui->enter_number_label->setText(QString::number(in_number));
         ui->enter_time_label->setText(in_time.toString());
         ui->exit_time_label->setText(out_time.toString());
@@ -217,14 +203,21 @@ void MainWindow::readSocket()
         ui->price_label->setText(QString("%1").arg(price));
 
         int diff = in_time.time().secsTo(out_time.time());
-        ui->duration_label->setText(QTime(diff/(3600),
-                                          (diff%(diff/(3600)))/60,
-                                          diff%((diff%(diff/(3600)))/60)).toString());
 
+        int hours = diff/3600;
+        int minutes = (diff%3600)/60;
+        int secs = (diff%3600)%60;
+        QTime time(hours,minutes,secs);
+        ui->duration_label->setText(time.toString());
+qDebug()<<9;
         showStatusMessage("<font color='green'>WIEGAND ID is deactivated");
 
-        print();
+        //print();
         return;
+    }
+    case Replies::INVALID:
+    default:{
+        showStatusMessage("Undefined error!");
     }
     }
 }
