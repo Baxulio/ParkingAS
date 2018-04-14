@@ -85,12 +85,11 @@ void MainWindow::makeConnection()
     ui->actionConnect->setEnabled(false);
     ui->actionDisconnect->setEnabled(true);
 
-    connect(&trigger, SIGNAL(trigger_show_code(quint32)), SLOT(wiegandCallback(quint32)));
+    emit connected(true);
 }
 
 void MainWindow::makeDisconnection()
-{
-    disconnect(&trigger, SIGNAL(trigger_show_code(quint32)),NULL,NULL);
+{ emit connected(false);
     bsocket->abort();
 
     ui->actionConnect->setEnabled(true);
@@ -158,7 +157,7 @@ void MainWindow::readSocket()
         ui->enter_number_label->setText(QString::number(in_number));
 
         showStatusMessage("<font color='green'>WIEGAND ID is already registered!");
-        bWiegand->openBareer();
+        //bWiegand->openBareer();
         return;
     }
     case Replies::SNAPSHOT_FAIL:{
@@ -169,7 +168,7 @@ void MainWindow::readSocket()
     case Replies::WIEGAND_REGISTERED:{
 
         showStatusMessage("<font color='green'>Successfully registered!");
-        bWiegand->openBareer();
+        //bWiegand->openBareer();
         return;
     }
 
