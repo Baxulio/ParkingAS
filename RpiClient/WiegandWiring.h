@@ -4,13 +4,18 @@
 #include <QObject>
 #include <wiringPi.h>
 
-z
+class Trigger
+{
+    Q_OBJECT
+signals:
+    void trigger_show_code(quint32 code);
+};
 
-extern void interrupt_d0(void);
+static Trigger trigger;
 
-extern void interrupt_d1(void);
+/* Defaults, change with command-line options */
 
-extern void interrupt_timeout(int p);
+#define DEBUG_MODE 0
 
 struct wiegand_data {
     unsigned char p0, p1;       //parity 0 , parity 1
@@ -19,43 +24,30 @@ struct wiegand_data {
     quint32 full_code;
     int code_valid;
     unsigned long bitcount;     // bits read
-};
+}wds;
 struct option_s {
     int d0pin;
     int d1pin;
     int bareerPin;
     int debug;
-};
+}options;
 
-class WiegandWiring : public QObject
-{
-    Q_OBJECT
-private:
-     wiegand_data wds;
-     option_s options;
-
-     void wiegand_sequence_reset();
-     void reset_timeout_timer(long usec);
-     int setup_wiegand_timeout_handler();
-
-     void add_bit_w26(int bit);
-     unsigned long get_bit_timediff_ns();
-public:
-    explicit WiegandWiring(QObject *parent = nullptr, int debug = 0);
-
-    bool startWiegand(int d0pin = 29, int d1pin = 28, int bareerPin = 0);
-    void cancel(void);
-    bool openBareer();
-    void show_code();
-
-signals:
-     void onReadyRead(quint32 full_code);
-
-public slots:
-     void wiegand_timeout(int p);
-
-     void d0_pulse(void);
-     void d1_pulse(void);
-};
+/* Timeout from last bit read, sequence may be completed or stopped */
+void wiegand_timeout(int u);
+void show_code();
+int setup_wiegand_timeout_handler();
+/* Parse Wiegand 26bit format
+ * Called wherever a new bit is read
+ * bit: 0 or 1
+ */
+void add_bit_w26(int bit);
+unsigned long get_bit_timediff_ns();
+void d0_pulse(void);
+void d1_pulse(void);
+void wiegand_sequence_reset();
+/* timeout handler, should fire after bit sequence has been read */
+void reset_timeout_timer(long usec);
+void openBareer();
+bool gpio_init(int d0pin, int d1pin, int bPin);
 
 #endif // WIEGANDWIRING_H

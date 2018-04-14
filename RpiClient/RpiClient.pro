@@ -38,8 +38,7 @@ HEADERS += \
     SettingsDialog.h \
     ../core.h \
     wiegandGPIO.hpp \
-    WiegandWiring.h \
-    wiegand.h
+    WiegandWiring.h
 
 FORMS += \
         mainwindow.ui \

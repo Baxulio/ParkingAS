@@ -12,6 +12,8 @@
 
 #include "../core.h"
 #include <QDebug>
+#include "WiegandWiring.h"
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
@@ -78,14 +80,22 @@ void MainWindow::makeConnection()
         makeDisconnection();
         return;
     }
-    emit connected(true);
     setUpServer();
+
+    ui->actionConnect->setEnabled(false);
+    ui->actionDisconnect->setEnabled(true);
+
+    connect(&trigger, SIGNAL(trigger_show_code(quint32)), SLOT(wiegandCallback(quint32)));
 }
 
 void MainWindow::makeDisconnection()
 {
+    disconnect(&trigger, SIGNAL(trigger_show_code(quint32)),NULL,NULL);
     bsocket->abort();
-    emit connected(false);
+
+    ui->actionConnect->setEnabled(true);
+    ui->actionDisconnect->setEnabled(false);
+
 }
 
 void MainWindow::wiegandCallback(quint32 value)
@@ -241,12 +251,6 @@ void MainWindow::print()
     painter.begin(&bPrinter);
     painter.drawText(100, 100, 500, 500, Qt::AlignLeft|Qt::AlignTop, text);
     painter.end();
-}
-
-void MainWindow::onConnectionState(bool b)
-{
-    ui->actionConnect->setEnabled(!b);
-    ui->actionDisconnect->setEnabled(b);
 }
 
 void MainWindow::initActionsConnections()
