@@ -102,6 +102,7 @@ void printBits()
 ///
 void loooooop(const char &siteCode){
     char useSiteCode = siteCode; // determines whether or no to use 26 bit site code.
+    unsigned char i;
 
     // This waits to make sure that there have been no more data pulses before processing data
     if (!flagDone) {
@@ -111,7 +112,6 @@ void loooooop(const char &siteCode){
 
     // if we have bits and the wiegand counter reached 0
     if (bitCount > 0 && flagDone) {
-        //unsigned char i;
 
         //Full wiegand 26 bit
         if (bitCount == 26 & useSiteCode == 'N')
@@ -234,7 +234,7 @@ int main(int argc, char *argv[])
     QObject::connect(&w,SIGNAL(connected(bool)),[](bool b){
         b?QObject::connect(&trigger, SIGNAL(onTriggered_timeout()),loooooop('N')):
           QObject::disconnect(&trigger, SIGNAL(onTriggered_timeout()));
-    })
+    });
 
             QObject::connect(&trigger, SIGNAL(onTriggered_ShowCode(quint32)),&w, SLOT(wiegandCallback(quint32)));
     QObject::connect(&trigger, SIGNAL(onTriggered_UnknownFormat(QString)),&w,SLOT(showStatusMessage(QString)));
