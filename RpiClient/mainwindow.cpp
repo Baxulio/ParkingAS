@@ -16,7 +16,6 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     bSettings(new SettingsDialog),
-    bWiegand(new WiegandWiring(this)),
     bsocket(new QTcpSocket(this)),
     label(new QLabel(this))
 {
@@ -28,7 +27,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     bPrintDialog = new QPrintDialog(&bPrinter,this);
 
-    connect(bWiegand, &WiegandWiring::onReadyRead, this, &MainWindow::wiegandCallback);
     connect(bsocket, &QTcpSocket::readyRead, this, &MainWindow::readSocket);
     //connect(bsocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error),
     //        this, &MainWindow::displaySocketError);
@@ -71,16 +69,6 @@ void MainWindow::showStatusMessage(const QString &message)
 
 void MainWindow::makeConnection()
 {
-    ///////////
-    //WIEGAND//
-    ///////////
-    if(!bWiegand->startWiegand(bSettings->wiegandSettings().gpio_0,
-                               bSettings->wiegandSettings().gpio_1,
-                               bSettings->wiegandSettings().bareerPin)){
-        showStatusMessage("<font color='red'>Cannot Initialize Wiegand!");
-        makeDisconnection();
-        return;
-    }
     //////////
     //SERVER//
     //////////
@@ -94,12 +82,10 @@ void MainWindow::makeConnection()
     ui->actionDisconnect->setEnabled(true);
 
     setUpServer();
-
 }
 
 void MainWindow::makeDisconnection()
 {
-    bWiegand->cancel();
     bsocket->abort();
 
     ui->actionConnect->setEnabled(true);
@@ -209,7 +195,7 @@ void MainWindow::readSocket()
         int secs = (diff%3600)%60;
         QTime time(hours,minutes,secs);
         ui->duration_label->setText(time.toString());
-qDebug()<<9;
+
         showStatusMessage("<font color='green'>WIEGAND ID is deactivated");
 
         //print();

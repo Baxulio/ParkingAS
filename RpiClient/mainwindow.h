@@ -2,7 +2,6 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "WiegandWiring.h"
 #include <QAbstractSocket>
 
 #include <QPrinter>
@@ -24,8 +23,6 @@ private:
     SettingsDialog *bSettings;
     QLabel *label;
 
-    WiegandWiring *bWiegand;
-
     QTcpSocket *bsocket;
     QDataStream in;
 
@@ -42,15 +39,18 @@ protected:
 
 private slots:
     void about();
-    void showStatusMessage(const QString &message);
     void makeConnection();
     void makeDisconnection();
-    void wiegandCallback(quint32 value);
 
     void readSocket();
     void displaySocketError(QAbstractSocket::SocketError socketError);
 
     void print();
+
+public slots:
+    void wiegandCallback(quint32 value);
+    void showStatusMessage(const QString &message);
+
 private:
     void setUpServer();
     void initActionsConnections();
