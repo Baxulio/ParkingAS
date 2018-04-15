@@ -13,18 +13,25 @@
 #include "../core.h"
 #include <QDebug>
 
+#include "WiegandWiring.h"
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     bSettings(new SettingsDialog),
     bsocket(new QTcpSocket(this)),
-    label(new QLabel(this))
+    label(new QLabel(this)),
+    bWiegand(new WiegandWiring(this))
 {
     ui->setupUi(this);
     ui->statusBar->addPermanentWidget(label);
 
     readSettings();
     initActionsConnections();
+
+    if(!bWiegand->startWiegand(bSettings->wiegandSettings().gpio_0,
+                            bSettings->wiegandSettings().gpio_1,
+                            bSettings->wiegandSettings().bareerPin))
+        exit(EXIT_FAILURE);
 
     bPrintDialog = new QPrintDialog(&bPrinter,this);
 
@@ -84,12 +91,12 @@ void MainWindow::makeConnection()
     ui->actionConnect->setEnabled(false);
     ui->actionDisconnect->setEnabled(true);
 
-    emit connected(true);
+   connect(bWiegand, &WiegandWiring::onReadyRead, this, &MainWindow::wiegandCallback);
 }
 
 void MainWindow::makeDisconnection()
 {
-    emit connected(false);
+    disconnect(bWiegand, &WiegandWiring::onReadyRead, NULL, NULL);
     bsocket->abort();
 
     ui->actionConnect->setEnabled(true);
@@ -98,7 +105,7 @@ void MainWindow::makeDisconnection()
 }
 
 void MainWindow::wiegandCallback(quint32 value)
-{
+{qDebug()<<value;
     const quint32 val=value;
     ui->wiegand_label->setText(QString::number(val));
     if(bSettings->modeSettings().mode){
@@ -157,7 +164,7 @@ void MainWindow::readSocket()
         ui->enter_number_label->setText(QString::number(in_number));
 
         showStatusMessage("<font color='green'>WIEGAND ID is already registered!");
-        //bWiegand->openBareer();
+        bWiegand->openBareer();
         return;
     }
     case Replies::SNAPSHOT_FAIL:{
@@ -168,7 +175,7 @@ void MainWindow::readSocket()
     case Replies::WIEGAND_REGISTERED:{
 
         showStatusMessage("<font color='green'>Successfully registered!");
-        //bWiegand->openBareer();
+        bWiegand->openBareer();
         return;
     }
 
@@ -204,6 +211,7 @@ void MainWindow::readSocket()
         showStatusMessage("<font color='green'>WIEGAND ID is deactivated");
 
         //print();
+        bWiegand->openBareer();
         return;
     }
     case Replies::INVALID:

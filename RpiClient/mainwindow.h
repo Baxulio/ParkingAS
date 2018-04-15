@@ -10,6 +10,7 @@
 #include <QTcpSocket>
 #include <QLabel>
 #include "SettingsDialog.h"
+#include "WiegandWiring.h"
 
 namespace Ui {
 class MainWindow;
@@ -22,13 +23,12 @@ private:
     Ui::MainWindow *ui;
     SettingsDialog *bSettings;
     QLabel *label;
-
+WiegandWiring *bWiegand;
     QTcpSocket *bsocket;
     QDataStream in;
 
     QPrintDialog *bPrintDialog;
     QPrinter bPrinter;
-
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
@@ -46,7 +46,6 @@ private slots:
     void displaySocketError(QAbstractSocket::SocketError socketError);
 
     void print();
-    void onConnectionState(bool b);
 
 public slots:
     void wiegandCallback(quint32 value);
@@ -58,8 +57,7 @@ private:
 
     void readSettings();
     void writeSettings();
-signals:
-    void connected(bool b);
+
 };
 
 #endif // MAINWINDOW_H

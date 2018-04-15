@@ -1,5 +1,4 @@
 #include "WiegandWiring.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -8,7 +7,16 @@
 #include <stdint.h>
 #include <sys/time.h>
 #include <signal.h>
-
+#include <wiringPi.h>
+void interrupt_d0(void){
+    emit trigger.onTriggered_d0();
+}
+void interrupt_d1(void){
+    emit trigger.onTriggered_d1();
+}
+void interrupt_timeout(int p){
+    emit trigger.onTriggered_timeout(p);
+}
 #define WIEGANDMAXBITS 40
 
 /* Set some timeouts */
@@ -25,28 +33,30 @@ struct itimerval it_val;
 struct sigaction sa;
 static struct timespec wbit_tm; //for debug
 
-void wiegand_timeout(int u) {
-    if (options.debug)
-        fprintf(stderr, "wiegand_timeout()\n");
-    wiegand_sequence_reset();
-    //    show_code();
-    emit trigger.trigger_show_code(wds.full_code);
+void WiegandWiring::wiegand_sequence_reset()
+{
+    wds.bitcount = 0;
 }
 
-void show_code() {
-    printf("\n");
-    printf("*** Code Valid: %d\n", wds.code_valid);
-    printf("*** Facility code: %d(dec) 0x%X\n", wds.facility_code,
-           wds.facility_code);
-    printf("*** Card code: %d(dec) 0x%X\n", wds.card_code, wds.card_code);
-    printf("*** Full code: %d\n", wds.full_code);
-    printf("*** Parity 0:%d Parity 1:%d\n", wds.p0, wds.p1);
-    fflush(stdout);
+/* timeout handler, should fire after bit sequence has been read */
+void WiegandWiring::reset_timeout_timer(long usec)
+{
+    it_val.it_value.tv_sec = 0;
+    it_val.it_value.tv_usec = usec;
+
+    it_val.it_interval.tv_sec = 0;
+    it_val.it_interval.tv_usec = 0;
+
+    if (setitimer(ITIMER_REAL, &it_val, NULL) == -1) {
+        perror("setitimer");
+        exit(1);
+    }
 }
 
-int setup_wiegand_timeout_handler() {
+int WiegandWiring::setup_wiegand_timeout_handler()
+{
     sigemptyset(&sa.sa_mask);
-    sa.sa_handler = wiegand_timeout;
+    sa.sa_handler = interrupt_timeout;
     //sa.sa_flags = SA_SIGINFO;
 
     if (options.debug)
@@ -58,8 +68,12 @@ int setup_wiegand_timeout_handler() {
     };
     return 0;
 }
-
-void add_bit_w26(int bit) {
+/* Parse Wiegand 26bit format
+ * Called wherever a new bit is read
+ * bit: 0 or 1
+ */
+void WiegandWiring::add_bit_w26(int bit)
+{
     static int parity0 = 0;
     static int parity1 = 0;
 
@@ -123,10 +137,10 @@ void add_bit_w26(int bit) {
     if (wds.bitcount < WIEGANDMAXBITS) {
         wds.bitcount++;
     }
-
 }
 
-unsigned long get_bit_timediff_ns() {
+unsigned long WiegandWiring::get_bit_timediff_ns()
+{
     struct timespec now, delta;
     unsigned long tdiff;
 
@@ -137,10 +151,63 @@ unsigned long get_bit_timediff_ns() {
     tdiff = delta.tv_sec * 1000000000 + delta.tv_nsec;
 
     return tdiff;
-
 }
 
-void d0_pulse() {
+WiegandWiring::WiegandWiring(QObject *parent, int debug) :
+    QObject(parent)
+{
+    options.debug=debug;
+    connect(&trigger, SIGNAL(onTriggered_d0()), this, SLOT(d0_pulse()));
+    connect(&trigger, SIGNAL(onTriggered_d1()), this, SLOT(d1_pulse()));
+    connect(&trigger, SIGNAL(onTriggered_timeout(int)), this, SLOT(wiegand_timeout(int)));
+}
+
+bool WiegandWiring::startWiegand(int d0pin, int d1pin, int bareerPin)
+{
+    /* defaults */
+    options.d0pin = d0pin;
+    options.d1pin = d1pin;
+    options.bareerPin = bareerPin;
+
+    if(setup_wiegand_timeout_handler()!=0)return false;
+
+    if(wiringPiSetup()<0)return false;
+
+    pinMode (bareerPin, OUTPUT) ;
+
+    pinMode(d0pin, INPUT);
+    pinMode(d1pin, INPUT);
+
+    pullUpDnControl(d0pin, PUD_UP);
+    pullUpDnControl(d1pin, PUD_UP);
+
+    wiringPiISR(d0pin, INT_EDGE_FALLING, interrupt_d0);
+    wiringPiISR(d1pin, INT_EDGE_FALLING, interrupt_d1);
+
+    wiegand_sequence_reset();
+    return true;
+}
+
+void WiegandWiring::openBareer()
+{
+    digitalWrite (options.bareerPin, HIGH); // On
+    delay (1000) ;		// mS
+    digitalWrite (options.bareerPin, LOW) ; // Off
+}
+
+/* Timeout from last bit read, sequence may be completed or stopped */
+void WiegandWiring::wiegand_timeout(int p)
+{
+    if (options.debug)
+        fprintf(stderr, "wiegand_timeout()\n");
+    wiegand_sequence_reset();
+
+    //show_code();
+    emit onReadyRead(wds.full_code);
+}
+
+void WiegandWiring::d0_pulse()
+{
     reset_timeout_timer(WIEGAND_BIT_INTERVAL_TIMEOUT_USEC);     //timeout waiting for next bit
     if (options.debug) {
         fprintf(stderr, "Bit:%02ld, Pulse 0, %ld us since last bit\n",
@@ -148,9 +215,11 @@ void d0_pulse() {
         clock_gettime(CLOCK_MONOTONIC, &wbit_tm);
     }
     add_bit_w26(0);
+
 }
 
-void d1_pulse() {
+void WiegandWiring::d1_pulse()
+{
     reset_timeout_timer(WIEGAND_BIT_INTERVAL_TIMEOUT_USEC);     //timeout waiting for next bit
     if (options.debug) {
         fprintf(stderr, "Bit:%02ld, Pulse 1, %ld us since last bit\n",
@@ -160,42 +229,14 @@ void d1_pulse() {
     add_bit_w26(1);
 }
 
-void wiegand_sequence_reset() {
-    wds.bitcount = 0;
-}
-
-void reset_timeout_timer(long usec) {
-    it_val.it_value.tv_sec = 0;
-    it_val.it_value.tv_usec = usec;
-
-    it_val.it_interval.tv_sec = 0;
-    it_val.it_interval.tv_usec = 0;
-
-    if (setitimer(ITIMER_REAL, &it_val, NULL) == -1) {
-        perror("setitimer");
-        exit(1);
-    }
-}
-
-bool gpio_init(int d0pin, int d1pin, int bPin) {
-
-    if(wiringPiSetup()<0)return false;
-    pinMode(d0pin, INPUT);
-    pinMode(d1pin, INPUT);
-
-    pinMode(bPin, OUTPUT);
-
-    pullUpDnControl(d0pin, PUD_OFF);
-    pullUpDnControl(d1pin, PUD_OFF);
-
-    wiringPiISR(d0pin, INT_EDGE_FALLING, d0_pulse);
-    wiringPiISR(d1pin, INT_EDGE_FALLING, d1_pulse);
-    return true;
-}
-
-void openBareer()
+void WiegandWiring::show_code()
 {
-    digitalWrite(options.bareerPin, HIGH);
-    delay(500);
-    digitalWrite(options.bareerPin, LOW);
+    printf("\n");
+    printf("*** Code Valid: %d\n", wds.code_valid);
+    printf("*** Facility code: %d(dec) 0x%X\n", wds.facility_code,
+           wds.facility_code);
+    printf("*** Card code: %d(dec) 0x%X\n", wds.card_code, wds.card_code);
+    printf("*** Full code: %d\n", wds.full_code);
+    printf("*** Parity 0:%d Parity 1:%d\n", wds.p0, wds.p1);
+    fflush(stdout);
 }
