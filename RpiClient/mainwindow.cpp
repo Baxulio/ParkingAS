@@ -105,9 +105,9 @@ void MainWindow::makeDisconnection()
 }
 
 void MainWindow::wiegandCallback(quint32 value)
-{qDebug()<<value;
-    const quint32 val=value;
-    ui->wiegand_label->setText(QString::number(val));
+{
+
+    ui->wiegand_label->setText(QString::number(value));
     if(bSettings->modeSettings().mode){
         ui->enter_number_label->setText(QString::number(bSettings->modeSettings().bareerNumber));
         ui->enter_time_label->setText(QDateTime::currentDateTime().toString());
@@ -119,7 +119,7 @@ void MainWindow::wiegandCallback(quint32 value)
     QDataStream out(&Buffer,QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_5_5);
 
-    out<<false<<val;
+    out<<false<<value;
 
     bsocket->write(Buffer);
     if(!bsocket->waitForReadyRead())showStatusMessage("<font color='red'>No reply");
