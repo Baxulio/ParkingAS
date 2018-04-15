@@ -45,6 +45,6 @@ void DatabaseManager::closeConnection()
 
 DatabaseManager::DatabaseManager():
     mDatabase(new QSqlDatabase(QSqlDatabase::addDatabase("QMYSQL")))
-
 {
+    mDatabase->setConnectOptions("MYSQL_OPT_RECONNECT(true)");
 }
