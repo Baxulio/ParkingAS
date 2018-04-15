@@ -16,7 +16,7 @@ public:
     static DatabaseManager& instance();
     ~DatabaseManager();
 
-    QSqlError connect(const QString& path = "Parking" ,const QString& host = "ParkingClient", const QString& login = "root", const QString& password = "", int port = 3306);
+    QSqlError connect(const QString& path = "Parking" ,const QString& host = "localhost", const QString& login = "Parking", const QString& password = "", int port = 3306);
     void closeConnection();
 protected:
     DatabaseManager();

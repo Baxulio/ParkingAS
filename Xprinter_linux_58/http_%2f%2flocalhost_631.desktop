@@ -1,0 +1,7 @@
+[Desktop Entry]
+Encoding=UTF-8
+Icon=www
+Name=打印机设置
+Name[zh_CN]=打印机设置
+Type=Link
+URL=http://localhost:631

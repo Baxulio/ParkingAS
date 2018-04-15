@@ -34,7 +34,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     ui->statusBar->addPermanentWidget(label);
 
-    bPrintDialog = new QPrintDialog(&bPrinter,this);
+    //bPrintDialog = new QPrintDialog(&bPrinter,this);
 
     readSettings();
     initActionsConnections();
@@ -140,10 +140,13 @@ void MainWindow::print()
             "</body>\n"
             "</html>\n";
 
-    QTextDocument document;
-    document.setHtml(strStream);
+    QTextDocument *document = new QTextDocument();
+    document->setHtml(strStream);
 
-    document.print(&bPrinter);
+    QPrintDialog *dialog = new QPrintDialog(&bPrinter, NULL);
+        if (dialog->exec() == QDialog::Accepted) {
+            document->print(&bPrinter);
+        }
 }
 
 void MainWindow::reloadSnapshot(const QModelIndex &index)

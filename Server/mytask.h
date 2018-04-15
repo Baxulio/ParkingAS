@@ -44,7 +44,7 @@ private:
 
     char *cFileName;
 private:
-    bool snapshot();
+    bool snapshot(const QDateTime &time);
     double calculate_formula(const QString &formula, const quint64 &secs);
 };
 

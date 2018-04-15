@@ -36,10 +36,12 @@ void MyTask::run()
                   "FROM `Parking`.`Active` WHERE `Active`.`rf_id`=:rf_id;");
     query.bindValue(":rf_id",bWiegand);
     if(!query.exec()){
-        qDebug()<<query.lastError().databaseText();
+        qDebug()<<query.lastError().text();
         return;
     }
     query.next();
+
+    QDateTime b_out_time = QDateTime::currentDateTime();
 
     ////ENTER
     if(bBareerMode){
@@ -50,20 +52,20 @@ void MyTask::run()
             return;
         }
 
-//        if(!snapshot()){
-//            emit Result(Replies::SNAPSHOT_FAIL);
-//            return;
-//        }
+        //        if(!snapshot(b_out_time)){
+        //            emit Result(Replies::SNAPSHOT_FAIL);
+        //            return;
+        //        }
 
         query.prepare("INSERT INTO `Parking`.`Active`(`rf_id`, `in_time`, `in_number`, `img`) "
                       "VALUES(:b_rf_id,:b_in_time,:b_in_number,:b_img);");
         query.bindValue(":b_rf_id",bWiegand);
-        query.bindValue(":b_in_time",QDateTime::currentDateTime());
+        query.bindValue(":b_in_time",b_out_time);
         query.bindValue(":b_in_number", bBareerNo);
         query.bindValue(":b_img", cFileName);
 
         if(!query.exec()){
-            qDebug()<<query.lastError().driverText();
+            qDebug()<<query.lastError().text();
             return;
         }
 
@@ -76,7 +78,7 @@ void MyTask::run()
             if(!query.exec("SELECT in_time, in_number, out_time, price "
                            "FROM History "
                            "WHERE out_time >= DATE_SUB(NOW() , INTERVAL 1 MINUTE)")){
-                qDebug()<<query.lastError().driverText();
+                qDebug()<<query.lastError().text();
                 return;
             }
             query.next();
@@ -91,10 +93,11 @@ void MyTask::run()
                         query.value("price").toDouble());
             return;
         }
-//        if(!snapshot()){
-//            emit Result(Replies::SNAPSHOT_FAIL);
-//            return;
-//        }
+
+        //        if(!snapshot(b_out_time)){
+        //            emit Result(Replies::SNAPSHOT_FAIL);
+        //            return;
+        //        }
 
         QSqlDatabase::database().transaction();
         //////////////////////////////
@@ -116,21 +119,19 @@ void MyTask::run()
         }
 
         double price = calculate_formula(query.value("price_formula").toString(),
-                                         b_in_time.secsTo(QDateTime::currentDateTime()));
+                                         b_in_time.secsTo(b_out_time));
 
         query.prepare("INSERT INTO `Parking`.`History`(`rf_id`, `in_time`, `out_time`, `in_number`, `out_number`, `price`, `img`, `img_out`) "
                       "VALUES(:b_rf_id, :b_in_time, :b_out_time, :b_in_number, :b_out_number, :b_price, :b_img, :b_img_out);");
         query.bindValue(":b_rf_id",bWiegand);
         query.bindValue(":b_in_time",b_in_time);
-        query.bindValue(":b_out_time",QDateTime::currentDateTime());
+        query.bindValue(":b_out_time",b_out_time);
         query.bindValue(":b_in_number",b_in_number);
         query.bindValue(":b_out_number", bBareerNo);
         query.bindValue(":b_img",b_img);
         query.bindValue(":b_img_out", cFileName);
         query.bindValue(":b_price", price);
         query.exec();
-
-        int b_last_insert_id=query.lastInsertId().toInt();
 
         query.prepare("DELETE FROM `Parking`.`Active` WHERE `id`=:b_id;");
         query.bindValue(":b_id",b_id);
@@ -141,27 +142,15 @@ void MyTask::run()
         /// ///////////////////////////
         if(!QSqlDatabase::database().commit()){
             emit Result(Replies::INVALID);
-            qDebug()<<QSqlDatabase::database().lastError().driverText();
+            qDebug()<<query.lastError().text();
             return;
         }
-        query.prepare("SELECT `in_time`, `out_time`, `in_number`, `price`"
-                      "FROM `Parking`.`History`"
-                      "WHERE `id` = :b_last_insert_id;");
-        query.bindValue(":b_last_insert_id",b_last_insert_id);
-        query.exec();
-        query.next();
-        emit Result(Replies::WIEGAND_DEACTIVATED,
-                    query.value("in_time").toDateTime(),
-                    query.value("in_number").toUInt(),
-                    query.value("out_time").toDateTime(),
-                    query.value("price").toDouble());
+        emit Result(Replies::WIEGAND_DEACTIVATED,b_in_time,b_in_number,b_out_time,price);
     }
 }
 
-bool MyTask::snapshot()
+bool MyTask::snapshot(const QDateTime &time)
 {
-    QDateTime time = QDateTime::currentDateTime();
-
     QString fileName = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation)+
             QString("/Parking/%1%2%3_%4%5%6_%7.jpeg")
             .arg(time.date().year())
@@ -182,7 +171,7 @@ double MyTask::calculate_formula(const QString &formula, const quint64 &secs)
 {
     double mins = secs/60;
     if(!formula.contains(':'))
-        return mins*formula.toDouble();
+        return mins*formula.toDouble()/60;
 
     QStringList priceList = formula.split(';',QString::SkipEmptyParts);
     foreach (QString str, priceList) {

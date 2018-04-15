@@ -27,13 +27,11 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     SettingsDialog.cpp \
-    DatabaseManager.cpp \
     ProxyModel.cpp
 
 HEADERS += \
         mainwindow.h \
     SettingsDialog.h \
-    DatabaseManager.h \
     ProxyModel.h
 
 FORMS += \
