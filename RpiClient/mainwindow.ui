@@ -6,15 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>643</width>
-    <height>582</height>
+    <width>777</width>
+    <height>634</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>ParkingAS</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../Client/clientresources.qrc">
+   <iconset resource="rpiclientresources.qrc">
     <normaloff>:/images/icons-home-parking.png</normaloff>:/images/icons-home-parking.png</iconset>
   </property>
   <property name="toolButtonStyle">
@@ -56,7 +56,7 @@
          <string/>
         </property>
         <property name="pixmap">
-         <pixmap resource="../Client/clientresources.qrc">:/images/icons-home-parking.png</pixmap>
+         <pixmap resource="rpiclientresources.qrc">:/images/icons-home-parking.png</pixmap>
         </property>
         <property name="scaledContents">
          <bool>true</bool>
@@ -171,7 +171,7 @@
          </font>
         </property>
         <property name="styleSheet">
-         <string notr="true">color: rgb(170, 255, 127);</string>
+         <string notr="true">color: rgb(255, 0, 0);</string>
         </property>
         <property name="text">
          <string>0</string>
@@ -259,7 +259,7 @@
      </layout>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout">
+     <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_3">
         <item>
@@ -306,6 +306,19 @@
            <string>00.00.00 00.00.00</string>
           </property>
          </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_6">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
         </item>
        </layout>
       </item>
@@ -362,20 +375,20 @@
           </property>
          </widget>
         </item>
+        <item>
+         <spacer name="horizontalSpacer_8">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
        </layout>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer_6">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
       </item>
      </layout>
     </item>
@@ -386,8 +399,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>643</width>
-     <height>21</height>
+     <width>777</width>
+     <height>19</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuCalls">
@@ -435,7 +448,7 @@
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionConnect">
    <property name="icon">
-    <iconset resource="../Client/clientresources.qrc">
+    <iconset resource="rpiclientresources.qrc">
      <normaloff>:/images/connect.png</normaloff>:/images/connect.png</iconset>
    </property>
    <property name="text">
@@ -453,7 +466,7 @@
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="../Client/clientresources.qrc">
+    <iconset resource="rpiclientresources.qrc">
      <normaloff>:/images/disconnect.png</normaloff>:/images/disconnect.png</iconset>
    </property>
    <property name="text">
@@ -468,7 +481,7 @@
   </action>
   <action name="actionConfigure">
    <property name="icon">
-    <iconset resource="../Client/clientresources.qrc">
+    <iconset resource="rpiclientresources.qrc">
      <normaloff>:/images/settings.png</normaloff>:/images/settings.png</iconset>
    </property>
    <property name="text">
@@ -483,7 +496,7 @@
   </action>
   <action name="actionQuit">
    <property name="icon">
-    <iconset resource="../Client/clientresources.qrc">
+    <iconset resource="rpiclientresources.qrc">
      <normaloff>:/images/application-exit.png</normaloff>:/images/application-exit.png</iconset>
    </property>
    <property name="text">
@@ -500,7 +513,7 @@
   </action>
   <action name="actionPrint">
    <property name="icon">
-    <iconset resource="../Client/clientresources.qrc">
+    <iconset resource="rpiclientresources.qrc">
      <normaloff>:/images/Cheque.png</normaloff>:/images/Cheque.png</iconset>
    </property>
    <property name="text">
@@ -518,7 +531,7 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
-  <include location="../Client/clientresources.qrc"/>
+  <include location="rpiclientresources.qrc"/>
  </resources>
  <connections/>
 </ui>
