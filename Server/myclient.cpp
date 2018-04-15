@@ -2,7 +2,7 @@
 
 #include "myclient.h"
 #include <QDataStream>
-#include "../core.h"
+#include "Core.h"
 
 MyClient::MyClient(QObject *parent) :
     QObject(parent),

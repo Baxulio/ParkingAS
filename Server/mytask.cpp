@@ -180,7 +180,7 @@ bool MyTask::snapshot()
 
 double MyTask::calculate_formula(const QString &formula, const quint64 &secs)
 {
-    double mins = secs/=60;
+    double mins = secs/60;
     if(!formula.contains(':'))
         return mins*formula.toDouble();
 
