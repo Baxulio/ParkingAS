@@ -106,18 +106,18 @@ void MyTask::run()
         quint8 b_in_number = query.value("in_number").toUInt();
         QString b_img = query.value("img").toString();
 
-        query.exec("SELECT `price_per_hour` FROM `Parking`.`Price`");
+        query.prepare("SELECT price_formula FROM Price INNER JOIN Cards ON Price.id = Cards.id WHERE Cards.code = :b_wiegand");
+        query.bindValue(":b_wiegand", bWiegand);
+        query.exec();
         query.next();
-
-        double price = query.value("price").toDouble();
-        quint64 secs = b_in_time.secsTo(QDateTime::currentDateTime());
-        if(secs/60<=10)
-            price=0;
-        else {
-            secs/=3600;
-            price += secs<=5?(secs-1)*1000:
-                             4000;
+        if(!query.isValid()){
+            query.exec("SELECT price_formula FROM Price WHERE car_type = 'Другое'");
+            query.next();
         }
+
+        double price = calculate_formula(query.value("price_formula").toString(),
+                                         b_in_time.secsTo(QDateTime::currentDateTime()));
+
         query.prepare("INSERT INTO `Parking`.`History`(`rf_id`, `in_time`, `out_time`, `in_number`, `out_number`, `price`, `img`, `img_out`) "
                       "VALUES(:b_rf_id, :b_in_time, :b_out_time, :b_in_number, :b_out_number, :b_price, :b_img, :b_img_out);");
         query.bindValue(":b_rf_id",bWiegand);
@@ -176,4 +176,20 @@ bool MyTask::snapshot()
     cFileName = ba.data();
 
     return H264_DVR_CatchPic(bLoginId,0,cFileName);
+}
+
+double MyTask::calculate_formula(const QString &formula, const quint64 &secs)
+{
+    double mins = secs/=60;
+    if(!formula.contains(':'))
+        return mins*formula.toDouble();
+
+    QStringList priceList = formula.split(';',QString::SkipEmptyParts);
+    foreach (QString str, priceList) {
+        QStringList pair = str.split(':',QString::SkipEmptyParts);
+        if(mins<=QString(pair[0]).toDouble()){
+            return QString(pair[1]).toDouble();
+        }
+        return QString(pair[1]).toDouble();
+    }
 }

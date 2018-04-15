@@ -45,6 +45,7 @@ private:
     char *cFileName;
 private:
     bool snapshot();
+    double calculate_formula(const QString &formula, const quint64 &secs);
 };
 
 #endif // MYTASK_H
