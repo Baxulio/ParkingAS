@@ -10,7 +10,7 @@
 
 #include <QPainter>
 
-#include "../core.h"
+#include "Core.h"
 #include <QDebug>
 
 #include "WiegandWiring.h"

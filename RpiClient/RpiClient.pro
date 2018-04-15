@@ -36,7 +36,6 @@ SOURCES += \
 HEADERS += \
         mainwindow.h \
     SettingsDialog.h \
-    ../core.h \
     wiegandGPIO.hpp \
     WiegandWiring.h
 
@@ -51,3 +50,8 @@ RESOURCES += \
 #qnx: target.path = /tmp/$${TARGET}/bin
 #else: unix:!android: target.path = /home/pi/$${TARGET}/bin
 #!isEmpty(target.path): INSTALLS += target
+
+unix:!macx: LIBS += -L$$OUT_PWD/../Core/ -lCore
+
+INCLUDEPATH += $$PWD/../Core
+DEPENDPATH += $$PWD/../Core

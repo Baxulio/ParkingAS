@@ -8,7 +8,7 @@
 
 #include <netsdk.h>
 
-#include "../core.h"
+#include "Core.h"
 #include <QStandardPaths>
 
 // When the thread pool kicks up
