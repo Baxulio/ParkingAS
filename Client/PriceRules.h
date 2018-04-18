@@ -20,7 +20,7 @@ public:
 
 private slots:
     void on_checkBox_clicked(bool checked);
-    void setCards(const QModelIndex &cur, const QModelIndex &prev);
+    void setCards(const QModelIndex &indx);
 
 private:
     Ui::PriceRules *ui;

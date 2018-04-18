@@ -19,6 +19,7 @@
 
 #include "PriceRules.h"
 
+#include <QPushButton>
 #include <QPrinter>
 #include <QPrintDialog>
 #include <QPainter>
