@@ -77,7 +77,7 @@ void MyTask::run()
         if(!query.isValid()){
             if(!query.exec("SELECT in_time, in_number, out_time, price "
                            "FROM History "
-                           "WHERE out_time >= DATE_SUB(NOW() , INTERVAL 1 MINUTE)")){
+                           "WHERE out_time >= DATE_SUB(NOW() , INTERVAL 1/3 MINUTE)")){
                 qDebug()<<query.lastError().text();
                 return;
             }
@@ -99,17 +99,12 @@ void MyTask::run()
         //            return;
         //        }
 
-        QSqlDatabase::database().transaction();
-        //////////////////////////////
-        /// MOVE TO HISTORY //////////
-        /// //////////////////////////
-        ///
         int b_id = query.value("id").toInt();
         QDateTime b_in_time = query.value("in_time").toDateTime();
         quint8 b_in_number = query.value("in_number").toUInt();
         QString b_img = query.value("img").toString();
 
-        query.prepare("SELECT price_formula FROM Price INNER JOIN Cards ON Price.id = Cards.id WHERE Cards.code = :b_wiegand");
+        query.prepare("SELECT Price.price_formula, Cards.last_period FROM Price INNER JOIN Cards ON Price.id = Cards.id WHERE Cards.code = :b_wiegand");
         query.bindValue(":b_wiegand", bWiegand);
         query.exec();
         query.next();
@@ -117,10 +112,18 @@ void MyTask::run()
             query.exec("SELECT price_formula FROM Price WHERE car_type = 'Другое'");
             query.next();
         }
-
+        else if(query.value("last_period").isNull()){
+            emit Result(Replies::WIEGAND_IS_MONTHLY,b_in_time,b_in_number,b_out_time);
+            return;
+        }
         double price = calculate_formula(query.value("price_formula").toString(),
                                          b_in_time.secsTo(b_out_time));
 
+        QSqlDatabase::database().transaction();
+        //////////////////////////////
+        /// MOVE TO HISTORY //////////
+        /// //////////////////////////
+        ///
         query.prepare("INSERT INTO `Parking`.`History`(`rf_id`, `in_time`, `out_time`, `in_number`, `out_number`, `price`, `img`, `img_out`) "
                       "VALUES(:b_rf_id, :b_in_time, :b_out_time, :b_in_number, :b_out_number, :b_price, :b_img, :b_img_out);");
         query.bindValue(":b_rf_id",bWiegand);
@@ -173,12 +176,13 @@ double MyTask::calculate_formula(const QString &formula, const quint64 &secs)
     if(!formula.contains(':'))
         return mins*formula.toDouble()/60;
 
+    QStringList pair;
     QStringList priceList = formula.split(';',QString::SkipEmptyParts);
     foreach (QString str, priceList) {
-        QStringList pair = str.split(':',QString::SkipEmptyParts);
+        pair = str.split(':',QString::SkipEmptyParts);
         if(mins<=QString(pair[0]).toDouble()){
             return QString(pair[1]).toDouble();
         }
-        return QString(pair[1]).toDouble();
     }
+    return QString(pair[1]).toDouble();
 }

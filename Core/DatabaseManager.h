@@ -22,10 +22,8 @@ protected:
     DatabaseManager();
     DatabaseManager& operator=(const DatabaseManager& rhs);
 
-private:
-    std::unique_ptr<QSqlDatabase> mDatabase;
-
-
+public:
+    std::unique_ptr<QSqlDatabase> bDatabase;
 };
 
 #endif // DATABASEMANAGER_H

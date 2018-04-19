@@ -29,22 +29,22 @@ DatabaseManager::~DatabaseManager()
 QSqlError DatabaseManager::connect(const QString &path, const QString &host, const QString &login, const QString &password, int port)
 {
     QSqlError err;
-    mDatabase->setDatabaseName(path);
-    mDatabase->setHostName(host);
-    mDatabase->setPort(port);
-    if(!mDatabase->open(login,password)){
-        err = mDatabase->lastError();
+    bDatabase->setDatabaseName(path);
+    bDatabase->setHostName(host);
+    bDatabase->setPort(port);
+    if(!bDatabase->open(login,password)){
+        err = bDatabase->lastError();
     }
     return err;
 }
 
 void DatabaseManager::closeConnection()
 {
-    mDatabase->close();
+    bDatabase->close();
 }
 
 DatabaseManager::DatabaseManager():
-    mDatabase(new QSqlDatabase(QSqlDatabase::addDatabase("QMYSQL")))
+    bDatabase(new QSqlDatabase(QSqlDatabase::addDatabase("QMYSQL")))
 {
-    mDatabase->setConnectOptions("MYSQL_OPT_RECONNECT=true");
+    bDatabase->setConnectOptions("MYSQL_OPT_RECONNECT=true");
 }

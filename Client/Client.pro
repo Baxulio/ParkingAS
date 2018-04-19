@@ -10,7 +10,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = Client
 TEMPLATE = app
-
+QTPLUGIN += qtaccessiblewidgets
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the
@@ -27,16 +27,19 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     SettingsDialog.cpp \
-    ProxyModel.cpp
+    ProxyModel.cpp \
+    PriceRules.cpp
 
 HEADERS += \
         mainwindow.h \
     SettingsDialog.h \
-    ProxyModel.h
+    ProxyModel.h \
+    PriceRules.h
 
 FORMS += \
         mainwindow.ui \
-    SettingsDialog.ui
+    SettingsDialog.ui \
+    PriceRules.ui
 
 RESOURCES += \
     clientresources.qrc

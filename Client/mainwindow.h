@@ -2,10 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QPrinter>
-#include <QPrintDialog>
 #include <DatabaseManager.h>
-#include <QSqlTableModel>
 
 namespace Ui {
 class MainWindow;
@@ -13,21 +10,21 @@ class MainWindow;
 
 class SettingsDialog;
 class QLabel;
+class QPushButton;
 class ProxyModel;
+class QSqlTableModel;
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 private:
     Ui::MainWindow *ui;
-    SettingsDialog *bSettings;
     QLabel *label;
-    QPrintDialog *bPrintDialog;
-    QPrinter bPrinter;
-    DatabaseManager& mDb;
-    QSqlTableModel *sourceModel;
+    QPushButton *refreshButton;
+    DatabaseManager &bDb;
+    SettingsDialog *bSettings;
+    QSqlTableModel *statusModel;
     ProxyModel *proxyModel;
-
 
 public:
     explicit MainWindow(QWidget *parent = 0);
@@ -45,7 +42,6 @@ private slots:
 
     void print();
     void reloadSnapshot(const QModelIndex &index);
-    void onPriceChanged(int value);
 
     void on_in_from_dateTime_dateTimeChanged(const QDateTime &dateTime);
 
@@ -65,11 +61,16 @@ private slots:
 
     void on_clear_button_clicked();
 
+    void on_show_advanced_button_clicked(bool checked);
+
+    void on_priceRules_triggered();
+
 private:
     void initActionsConnections();
 
     void readSettings();
     void writeSettings();
+    void updateTable();
 };
 
 #endif // MAINWINDOW_H

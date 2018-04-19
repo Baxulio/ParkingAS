@@ -15,5 +15,6 @@
         <file>images/save.png</file>
         <file>images/settings.png</file>
         <file>images/time.png</file>
+        <file>images/money.png</file>
     </qresource>
 </RCC>

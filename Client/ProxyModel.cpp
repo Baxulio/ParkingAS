@@ -2,7 +2,7 @@
 
 ProxyModel::ProxyModel(QObject *parent):
     QSortFilterProxyModel (parent),
-    in(0),out(0),rf_id(0)
+    rf_id(0),in(0),out(0)
 {
 }
 

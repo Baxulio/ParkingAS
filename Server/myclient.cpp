@@ -123,6 +123,12 @@ void MyClient::TaskResult(int Number, QDateTime in_time, quint8 in_number, QDate
         out<<in_time;
         out<<in_number;
     }
+    else if(Number == Replies::WIEGAND_IS_MONTHLY)
+    {
+        out<<in_time;
+        out<<in_number;
+        out<<out_time;
+    }
     else if(Number == Replies::WIEGAND_DEACTIVATED || Number == Replies::WIEGAND_ALREADY_DEACTIVATED){
         out<<in_time;
         out<<in_number;
