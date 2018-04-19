@@ -23,9 +23,9 @@ CREATE TABLE IF NOT EXISTS `Active` (
   `in_number` tinyint(3) unsigned NOT NULL,
   `img` tinytext NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Дамп данных таблицы Parking.Active: ~19 rows (приблизительно)
+-- Дамп данных таблицы Parking.Active: ~0 rows (приблизительно)
 DELETE FROM `Active`;
 /*!40000 ALTER TABLE `Active` DISABLE KEYS */;
 /*!40000 ALTER TABLE `Active` ENABLE KEYS */;
@@ -35,15 +35,17 @@ DELETE FROM `Active`;
 CREATE TABLE IF NOT EXISTS `Cards` (
   `id` int(11) NOT NULL,
   `code` int(11) NOT NULL,
+  `last_period` date DEFAULT NULL,
   KEY `FK_Cards_Price` (`id`),
   CONSTRAINT `FK_Cards_Price` FOREIGN KEY (`id`) REFERENCES `price` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Дамп данных таблицы Parking.Cards: ~0 rows (приблизительно)
+-- Дамп данных таблицы Parking.Cards: ~2 rows (приблизительно)
 DELETE FROM `Cards`;
 /*!40000 ALTER TABLE `Cards` DISABLE KEYS */;
-INSERT INTO `Cards` (`id`, `code`) VALUES
-	(1, 3487799);
+INSERT INTO `Cards` (`id`, `code`, `last_period`) VALUES
+	(1, 3487799, NULL),
+	(3, 3503261, NULL);
 /*!40000 ALTER TABLE `Cards` ENABLE KEYS */;
 
 
@@ -59,9 +61,9 @@ CREATE TABLE IF NOT EXISTS `History` (
   `img` tinytext NOT NULL,
   `img_out` tinytext NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Дамп данных таблицы Parking.History: ~9 rows (приблизительно)
+-- Дамп данных таблицы Parking.History: ~0 rows (приблизительно)
 DELETE FROM `History`;
 /*!40000 ALTER TABLE `History` DISABLE KEYS */;
 /*!40000 ALTER TABLE `History` ENABLE KEYS */;
@@ -113,14 +115,15 @@ CREATE TABLE IF NOT EXISTS `Price` (
   `car_type` tinytext NOT NULL,
   `price_formula` tinytext NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 
--- Дамп данных таблицы Parking.Price: ~0 rows (приблизительно)
+-- Дамп данных таблицы Parking.Price: ~2 rows (приблизительно)
 DELETE FROM `Price`;
 /*!40000 ALTER TABLE `Price` DISABLE KEYS */;
 INSERT INTO `Price` (`id`, `car_type`, `price_formula`) VALUES
 	(1, 'Легковые', '10:0;60:3000;120:4000;180:5000;240:6000;300:7000'),
-	(2, 'Другое', '3000');
+	(2, 'Другое', '3000'),
+	(3, 'Фура', '60000');
 /*!40000 ALTER TABLE `Price` ENABLE KEYS */;
 
 

@@ -41,7 +41,7 @@ private slots:
     void makeDisconnection();
 
     void print();
-    void reloadSnapshot(const QModelIndex &index);
+    void reloadSnapshot(const QModelIndex &index, const QModelIndex &prev);
 
     void on_in_from_dateTime_dateTimeChanged(const QDateTime &dateTime);
 

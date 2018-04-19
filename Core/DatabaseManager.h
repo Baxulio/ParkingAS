@@ -4,11 +4,13 @@
 #include <memory>
 #include <QString>
 
+#include "core_global.h"
+
 class QSqlQuery;
 class QSqlDatabase;
 class QSqlError;
 
-class DatabaseManager
+class CORESHARED_EXPORT DatabaseManager
 {
 public:
     static void debugQuery(const QSqlQuery& query);

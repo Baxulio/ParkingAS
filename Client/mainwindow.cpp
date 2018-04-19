@@ -28,6 +28,7 @@
 #include <QTextDocument>
 #include <QTextStream>
 
+#include <QDebug>
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
@@ -42,15 +43,18 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->statusBar->addWidget(refreshButton);
     ui->statusBar->addWidget(label);
-    connect(refreshButton, &QPushButton::clicked, this, &MainWindow::updateTable);
 
     readSettings();
     initActionsConnections();
 
+    statusModel->setEditStrategy(QSqlTableModel::OnManualSubmit);
     proxyModel->setSourceModel(statusModel);
     ui->tableView->setModel(proxyModel);
 
-    connect(ui->tableView, &QTableView::clicked, this, &MainWindow::reloadSnapshot);
+    connect(refreshButton, &QPushButton::clicked, [this](){
+        on_status_combo_currentIndexChanged(ui->status_combo->currentIndex());
+    });
+    connect(ui->tableView->selectionModel(), &QItemSelectionModel::currentRowChanged, this, &MainWindow::reloadSnapshot);
 
     makeConnection();
 }
@@ -102,6 +106,7 @@ void MainWindow::makeConnection()
         return;
     }
     ui->actionConnect->setEnabled(false);
+    ui->actionDisconnect->setEnabled(true);
     showStatusMessage("<font color='green'>Successfully connected!");
 
     on_status_combo_currentIndexChanged(ui->status_combo->currentIndex());
@@ -111,6 +116,8 @@ void MainWindow::makeDisconnection()
 {
     bDb.closeConnection();
     ui->actionConnect->setEnabled(true);
+    ui->actionDisconnect->setEnabled(false);
+    showStatusMessage("<font color='gray'>Successfully Disconnected!");
 }
 
 void MainWindow::print()
@@ -160,7 +167,7 @@ void MainWindow::print()
     }
 }
 
-void MainWindow::reloadSnapshot(const QModelIndex &index)
+void MainWindow::reloadSnapshot(const QModelIndex &index, const QModelIndex &prev)
 {
     QString path;
     QPixmap pix;
@@ -188,6 +195,7 @@ void MainWindow::initActionsConnections()
     connect(ui->actionConfigure, &QAction::triggered, bSettings, &SettingsDialog::show);
     connect(ui->actionAbout, &QAction::triggered, this, &MainWindow::about);
     connect(ui->actionConnect,&QAction::triggered, this, &MainWindow::makeConnection);
+    connect(ui->actionDisconnect,&QAction::triggered, this, &MainWindow::makeDisconnection);
     connect(ui->actionPrint, &QAction::triggered, this, &MainWindow::print);
 }
 
@@ -237,19 +245,11 @@ void MainWindow::writeSettings()
     settings.setValue("advanced_filters",ui->show_advanced_button->isChecked());
 }
 
-void MainWindow::updateTable()
-{
-    if(!statusModel->select()){
-            showStatusMessage(QString("<font color='red'>%1").arg(statusModel->lastError().text()));
-            makeDisconnection();
-    }
-    //filtredPrice->setText(proxyModel->totalPrice())
-}
-
 void MainWindow::on_in_from_dateTime_dateTimeChanged(const QDateTime &dateTime)
 {
-    proxyModel->setFilterIn_Time_From(dateTime);
-    ui->in_to_dateTime->setDateTime(dateTime);
+    proxyModel->setFilterIn_Time_From(dateTime==ui->in_from_dateTime->minimumDateTime()?QDateTime():dateTime);
+    QDateTime t= dateTime;
+    ui->in_to_dateTime->setDateTime(QDateTime(t.date(),t.time().addSecs(60)));
 }
 
 void MainWindow::on_wiegand_id_spin_valueChanged(int arg1)
@@ -259,12 +259,12 @@ void MainWindow::on_wiegand_id_spin_valueChanged(int arg1)
 
 void MainWindow::on_in_to_dateTime_dateTimeChanged(const QDateTime &dateTime)
 {
-    proxyModel->setFilterIn_Time_To(dateTime);
+    proxyModel->setFilterIn_Time_To(dateTime==ui->in_to_dateTime->maximumDateTime()?QDateTime():dateTime);
 }
 
 void MainWindow::on_out_to_dateTime_dateTimeChanged(const QDateTime &dateTime)
 {
-    proxyModel->setFilterOut_Time_To(dateTime);
+    proxyModel->setFilterIn_Time_To(dateTime==ui->out_to_dateTime->maximumDateTime()?QDateTime():dateTime);
 }
 
 void MainWindow::on_in_spin_valueChanged(int arg1)
@@ -280,17 +280,26 @@ void MainWindow::on_out_spin_valueChanged(int arg1)
 void MainWindow::on_status_combo_currentIndexChanged(int index)
 {
     //if(ui->actionConnect->isEnabled())return;
-    index?statusModel->setTable("Active"):
-          statusModel->setTable("History");
-
-    updateTable();
+    if(index){
+        statusModel->setTable("Active");
+        proxyModel->in_col=3;
+    }
+    else {
+        statusModel->setTable("History");
+        proxyModel->in_col=4;
+    }
+    if(!statusModel->select()){
+        showStatusMessage(QString("<font color='red'>%1").arg(statusModel->lastError().text()));
+        makeDisconnection();
+    }
     proxyModel->setHeaders(/*here i could pass criteria*/);
 }
 
 void MainWindow::on_out_from_dateTime_dateTimeChanged(const QDateTime &dateTime)
 {
-    proxyModel->setFilterOut_Time_From(dateTime);
-    ui->out_to_dateTime->setDateTime(dateTime);
+    proxyModel->setFilterIn_Time_From(dateTime==ui->out_from_dateTime->minimumDateTime()?QDateTime():dateTime);
+    QDateTime t= dateTime;
+    ui->out_to_dateTime->setDateTime(QDateTime(t.date(),t.time().addSecs(60)));
 }
 
 void MainWindow::on_clear_button_clicked()
@@ -298,10 +307,10 @@ void MainWindow::on_clear_button_clicked()
     ui->wiegand_id_spin->setValue(0);
     ui->in_spin->setValue(0);
     ui->out_spin->setValue(0);
-    ui->in_from_dateTime->setDateTime(QDateTime());
-    //    ui->in_to_dateTime->setDateTime(QDateTime());
-    //    ui->out_to_dateTime->setDateTime(QDateTime());
-    ui->out_from_dateTime->setDateTime(QDateTime());
+    ui->in_from_dateTime->setDateTime(ui->in_from_dateTime->minimumDateTime());
+    ui->in_to_dateTime->setDateTime(ui->in_to_dateTime->maximumDateTime());
+    ui->out_from_dateTime->setDateTime(ui->out_from_dateTime->minimumDateTime());
+    ui->out_to_dateTime->setDateTime(ui->out_to_dateTime->maximumDateTime());
 }
 
 void MainWindow::on_show_advanced_button_clicked(bool checked)
@@ -311,7 +320,12 @@ void MainWindow::on_show_advanced_button_clicked(bool checked)
 
 void MainWindow::on_priceRules_triggered()
 {
-    PriceRules *priceRules = new PriceRules(this);
-    //priceRules->setModal(true);
-    priceRules->exec();
+    if(ui->actionConnect->isEnabled())
+    {
+        showStatusMessage("Can't operate! First connect!");
+        return;
+    }
+    PriceRules priceRules(this);
+    priceRules.setModal(true);
+    priceRules.exec();
 }

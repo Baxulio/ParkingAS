@@ -10,6 +10,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName("ParkingAS");
     QCoreApplication::setApplicationVersion(QT_VERSION_STR);
 
+    app.setStyle("Fusion");
     MainWindow w;
     w.show();
 

@@ -19,6 +19,7 @@ public:
     void setFilterOut_Time_To(const QDateTime &time);
     void setHeaders();
 
+    int in_col;
     // QSortFilterProxyModel interface
 protected:
     bool filterAcceptsRow(int source_row, const QModelIndex &source_parent) const override;

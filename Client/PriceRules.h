@@ -2,13 +2,29 @@
 #define PRICERULES_H
 
 #include <QDialog>
+#include <QSqlTableModel>
 
 namespace Ui {
 class PriceRules;
 }
 
-class QSqlTableModel;
 class DatabaseManager;
+class QAbstractButton;
+
+class CustomModel: public QSqlTableModel
+{
+    Q_OBJECT
+public:
+    explicit CustomModel(QObject *parent = nullptr, QSqlDatabase db = QSqlDatabase())
+        : QSqlTableModel(parent, db) {}
+
+    QVariant data(const QModelIndex &idx, int role) const override
+    {
+        if (role == Qt::BackgroundRole && isDirty(idx))
+            return QBrush(QColor(Qt::yellow));
+        return QSqlTableModel::data(idx, role);
+    }
+};
 
 class PriceRules : public QDialog
 {
@@ -19,8 +35,17 @@ public:
     ~PriceRules();
 
 private slots:
-    void on_checkBox_clicked(bool checked);
     void setCards(const QModelIndex &indx);
+
+    void on_buttonBox_clicked(QAbstractButton *button);
+
+    void on_addPrice_but_clicked();
+
+    void on_remPrice_but_clicked();
+
+    void on_addCard_but_clicked();
+
+    void on_remCard_but_clicked();
 
 private:
     Ui::PriceRules *ui;

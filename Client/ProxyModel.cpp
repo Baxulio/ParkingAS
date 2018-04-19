@@ -1,5 +1,5 @@
 #include "ProxyModel.h"
-
+#include <QDebug>
 ProxyModel::ProxyModel(QObject *parent):
     QSortFilterProxyModel (parent),
     rf_id(0),in(0),out(0)
@@ -67,7 +67,6 @@ bool ProxyModel::filterAcceptsRow(int source_row, const QModelIndex &source_pare
     if(rf_id && sourceModel()->data(sourceModel()->index(source_row, 1, source_parent)).toInt()!=rf_id)
         return false;
 
-    int in_col = sourceModel()->headerData(4,Qt::Horizontal,Qt::DisplayRole).toString()=="in_number"?4:3;
     if(in && sourceModel()->data(sourceModel()->index(source_row, in_col, source_parent)).toInt()!=in)
         return false;
 

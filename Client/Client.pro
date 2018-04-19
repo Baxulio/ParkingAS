@@ -28,13 +28,17 @@ SOURCES += \
         mainwindow.cpp \
     SettingsDialog.cpp \
     ProxyModel.cpp \
-    PriceRules.cpp
+    PriceRules.cpp \
+    DateDelegate.cpp \
+    SubscriptionDelegate.cpp
 
 HEADERS += \
         mainwindow.h \
     SettingsDialog.h \
     ProxyModel.h \
-    PriceRules.h
+    PriceRules.h \
+    DateDelegate.h \
+    SubscriptionDelegate.h
 
 FORMS += \
         mainwindow.ui \

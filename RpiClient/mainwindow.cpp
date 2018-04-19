@@ -12,15 +12,16 @@
 
 #include "Core.h"
 #include <QDebug>
+#include <QTimer>
 
 #include "WiegandWiring.h"
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     bSettings(new SettingsDialog),
-    bsocket(new QTcpSocket(this)),
     label(new QLabel(this)),
-    bWiegand(new WiegandWiring(this))
+    bWiegand(new WiegandWiring(this)),
+    bsocket(new QTcpSocket(this))
 {
     ui->setupUi(this);
     ui->statusBar->addPermanentWidget(label);
@@ -73,6 +74,14 @@ void MainWindow::about()
 void MainWindow::showStatusMessage(const QString &message)
 {
     label->setText(message);
+    QMessageBox box;
+    box.setText(message);
+
+    QTimer timer;
+    connect(&timer, &QTimer::timeout, [&box](){box.close();});
+
+    timer.start(5000);
+    box.open();
 }
 
 void MainWindow::makeConnection()
@@ -106,7 +115,6 @@ void MainWindow::makeDisconnection()
 
 void MainWindow::wiegandCallback(quint32 value)
 {
-
     ui->wiegand_label->setText(QString::number(value));
     if(bSettings->modeSettings().mode){
         ui->enter_number_label->setText(QString::number(bSettings->modeSettings().bareerNumber));
@@ -210,7 +218,7 @@ void MainWindow::readSocket()
 
         showStatusMessage("<font color='green'>WIEGAND ID is deactivated");
 
-        //print();
+        print();
         bWiegand->openBareer();
         return;
     }
@@ -241,12 +249,16 @@ void MainWindow::displaySocketError(QAbstractSocket::SocketError socketError)
 
 void MainWindow::print()
 {
-    QString text = QString("Tashkent Trade Center %1\n"
+    QString text = QString("-----------------------------------\n"
+                           "Tashkent Trade Center %1\n\n"
                            "Карта: %2\n"
-                           "От: %3\n"
-                           "До: %4\n"
+                           "От:    %3\n"
+                           "До:    %4\n"
                            "Время: %5\n"
-                           "Цена: %6")
+                           "Цена:  %6\n"
+                           "\n"
+                           "--------------------- Global Defence\n"
+                           "\n")
             .arg(bSettings->modeSettings().bareerNumber)
             .arg(ui->wiegand_label->text())
             .arg(ui->enter_time_label->text())

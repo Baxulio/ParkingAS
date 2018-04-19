@@ -193,8 +193,15 @@
             </item>
             <item>
              <widget class="QDateTimeEdit" name="in_from_dateTime">
-              <property name="showGroupSeparator" stdset="0">
-               <bool>false</bool>
+              <property name="dateTime">
+               <datetime>
+                <hour>0</hour>
+                <minute>0</minute>
+                <second>0</second>
+                <year>2018</year>
+                <month>1</month>
+                <day>1</day>
+               </datetime>
               </property>
               <property name="date">
                <date>
@@ -203,8 +210,21 @@
                 <day>1</day>
                </date>
               </property>
+              <property name="minimumDateTime">
+               <datetime>
+                <hour>0</hour>
+                <minute>0</minute>
+                <second>0</second>
+                <year>1818</year>
+                <month>1</month>
+                <day>1</day>
+               </datetime>
+              </property>
+              <property name="currentSection">
+               <enum>QDateTimeEdit::NoSection</enum>
+              </property>
               <property name="displayFormat">
-               <string>d/M/yy h:mm AP</string>
+               <string>Дата: dd | MM | yyyy   Время: H:mm</string>
               </property>
               <property name="calendarPopup">
                <bool>true</bool>
@@ -240,8 +260,18 @@
                 <day>1</day>
                </date>
               </property>
+              <property name="minimumDateTime">
+               <datetime>
+                <hour>0</hour>
+                <minute>0</minute>
+                <second>0</second>
+                <year>1818</year>
+                <month>1</month>
+                <day>1</day>
+               </datetime>
+              </property>
               <property name="displayFormat">
-               <string>d/M/yy h:mm AP</string>
+               <string>Дата: dd | MM | yyyy   Время: H:mm</string>
               </property>
               <property name="calendarPopup">
                <bool>true</bool>
@@ -301,8 +331,18 @@
                 <day>1</day>
                </date>
               </property>
+              <property name="minimumDateTime">
+               <datetime>
+                <hour>0</hour>
+                <minute>0</minute>
+                <second>0</second>
+                <year>1818</year>
+                <month>1</month>
+                <day>1</day>
+               </datetime>
+              </property>
               <property name="displayFormat">
-               <string>d/M/yy h:mm AP</string>
+               <string>Дата: dd | MM | yyyy   Время: H:mm</string>
               </property>
               <property name="calendarPopup">
                <bool>true</bool>
@@ -338,8 +378,18 @@
                 <day>1</day>
                </date>
               </property>
+              <property name="minimumDateTime">
+               <datetime>
+                <hour>0</hour>
+                <minute>0</minute>
+                <second>0</second>
+                <year>1818</year>
+                <month>1</month>
+                <day>1</day>
+               </datetime>
+              </property>
               <property name="displayFormat">
-               <string>d/M/yy h:mm AP</string>
+               <string>Дата: dd | MM | yyyy   Время: H:mm</string>
               </property>
               <property name="calendarPopup">
                <bool>true</bool>
@@ -358,6 +408,9 @@
      <widget class="QTableView" name="tableView">
       <property name="sizeAdjustPolicy">
        <enum>QAbstractScrollArea::AdjustIgnored</enum>
+      </property>
+      <property name="editTriggers">
+       <set>QAbstractItemView::DoubleClicked</set>
       </property>
       <property name="showDropIndicator" stdset="0">
        <bool>false</bool>
@@ -393,7 +446,7 @@
      <x>0</x>
      <y>0</y>
      <width>839</width>
-     <height>19</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuCalls">
@@ -430,6 +483,7 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionConnect"/>
+   <addaction name="actionDisconnect"/>
    <addaction name="actionConfigure"/>
    <addaction name="separator"/>
    <addaction name="priceRules"/>
@@ -486,7 +540,7 @@
     <string>Подключить</string>
    </property>
    <property name="toolTip">
-    <string>Connect to serial port</string>
+    <string>Подключиться к серверу!</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
@@ -501,10 +555,10 @@
      <normaloff>:/images/disconnect.png</normaloff>:/images/disconnect.png</iconset>
    </property>
    <property name="text">
-    <string>&amp;Disconnect</string>
+    <string>Разъединить</string>
    </property>
    <property name="toolTip">
-    <string>Disconnect from serial port</string>
+    <string>Разорвать соединение с сервером!</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+D</string>
@@ -519,7 +573,7 @@
     <string>Настройка</string>
    </property>
    <property name="toolTip">
-    <string>Configure serial port</string>
+    <string>Настроить параметры!</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
@@ -551,7 +605,7 @@
     <string>Печать таблицы</string>
    </property>
    <property name="toolTip">
-    <string>Prints cheque</string>
+    <string>Распечатать текущую отфильтрованную таблицу!</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+P</string>
@@ -564,6 +618,9 @@
    </property>
    <property name="text">
     <string>Ценовая политика</string>
+   </property>
+   <property name="toolTip">
+    <string>Настройка ценовой политики!</string>
    </property>
   </action>
  </widget>
