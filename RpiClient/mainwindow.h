@@ -10,8 +10,9 @@
 #include "Core.h"
 #include "wiringPi.h"
 
-#include <QElapsedTimer>
 #include <QLabel>
+#include <QTimer>
+#include <QMovie>
 
 namespace Ui {
 class MainWindow;
@@ -29,7 +30,10 @@ private:
 
     QPrinter bPrinter;
     QLabel *label;
-    QElapsedTimer timer;
+    QTimer timer;
+
+    QMovie connectingGIF;
+    QMovie waitingGIF;
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
@@ -47,8 +51,6 @@ private slots:
     void displaySocketError(QAbstractSocket::SocketError socketError);
 
     void print();
-
-    void on_actionPrinterSettings_triggered();
 
 public slots:
     void wiegandCallback(quint32 value);
