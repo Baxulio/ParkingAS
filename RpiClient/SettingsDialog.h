@@ -30,15 +30,10 @@ public:
         quint32 port;
         quint8 connectionMethod;
     };
-    struct WiegandSettings {
-        quint8 gpio_0;
-        quint8 gpio_1;
-        quint8 bareerPin;
-    };
+
     explicit SettingsDialog(ServerSettings server = ServerSettings{QString("ParkingServer"),QString("ParkingUser"),QString(""),quint32(3306)},
                             ModeSettings mode = ModeSettings{true,1},
                             DVRSettings dvr = DVRSettings{QString("DVR1"), QString("DVRUser"),QString(""),quint32(34567),quint8(0)},
-                            WiegandSettings wiegand = WiegandSettings{quint8(29),quint8(28),quint8(0)},
                             QWidget *parent = nullptr);
     ~SettingsDialog();
 
@@ -51,15 +46,11 @@ public:
     DVRSettings dvrSettings() const {return bDVRSettings;}
     void setDvrSettings(const DVRSettings dvr);
 
-    WiegandSettings wiegandSettings() const {return bWiegandSettings;}
-    void setWiegandSettings(const WiegandSettings wiegand);
-
 private:
     Ui::SettingsDialog *ui = nullptr;
     ServerSettings bServerSettings;
     ModeSettings bModeSettings;
     DVRSettings bDVRSettings;
-    WiegandSettings bWiegandSettings;
 
 private slots:
     void apply();

@@ -29,15 +29,11 @@ LIBS += -lwiringPi -lpthread
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    SettingsDialog.cpp \
-    wiegandGPIO.cpp \
-    WiegandWiring.cpp
+    SettingsDialog.cpp
 
 HEADERS += \
         mainwindow.h \
-    SettingsDialog.h \
-    wiegandGPIO.hpp \
-    WiegandWiring.h
+    SettingsDialog.h
 
 FORMS += \
         mainwindow.ui \

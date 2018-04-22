@@ -4,41 +4,28 @@
 #include <QSettings>
 #include <QDesktopWidget>
 #include <QCloseEvent>
-
 #include <QMessageBox>
+
 #include <QDateTime>
 
 #include <QPainter>
 
-#include "Core.h"
-#include <QDebug>
-#include <QTimer>
-
-#include "WiegandWiring.h"
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     bSettings(new SettingsDialog),
-    label(new QLabel(this)),
-    bWiegand(new WiegandWiring(this)),
-    bsocket(new QTcpSocket(this))
+    bsocket(new QTcpSocket(this)),
+    label(new QLabel(this))
 {
     ui->setupUi(this);
+
     ui->statusBar->addPermanentWidget(label);
 
     readSettings();
     initActionsConnections();
 
-    if(!bWiegand->startWiegand(bSettings->wiegandSettings().gpio_0,
-                            bSettings->wiegandSettings().gpio_1,
-                            bSettings->wiegandSettings().bareerPin))
-        exit(EXIT_FAILURE);
-
-    bPrintDialog = new QPrintDialog(&bPrinter,this);
-
     connect(bsocket, &QTcpSocket::readyRead, this, &MainWindow::readSocket);
-    //connect(bsocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error),
-    //        this, &MainWindow::displaySocketError);
+    connect(bsocket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(displaySocketError(QAbstractSocket::SocketError)));
 }
 
 MainWindow::~MainWindow()
@@ -74,14 +61,6 @@ void MainWindow::about()
 void MainWindow::showStatusMessage(const QString &message)
 {
     label->setText(message);
-    QMessageBox box;
-    box.setText(message);
-
-    QTimer timer;
-    connect(&timer, &QTimer::timeout, [&box](){box.close();});
-
-    timer.start(5000);
-    box.open();
 }
 
 void MainWindow::makeConnection()
@@ -99,22 +78,32 @@ void MainWindow::makeConnection()
 
     ui->actionConnect->setEnabled(false);
     ui->actionDisconnect->setEnabled(true);
-
-   connect(bWiegand, &WiegandWiring::onReadyRead, this, &MainWindow::wiegandCallback);
 }
 
 void MainWindow::makeDisconnection()
 {
-    disconnect(bWiegand, &WiegandWiring::onReadyRead, NULL, NULL);
     bsocket->abort();
 
     ui->actionConnect->setEnabled(true);
     ui->actionDisconnect->setEnabled(false);
-
 }
 
 void MainWindow::wiegandCallback(quint32 value)
 {
+    timer.start();
+    QByteArray Buffer;
+    QDataStream out(&Buffer,QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_5_5);
+
+    out<<false<<value;
+
+    bsocket->write(Buffer);
+    if(!bsocket->waitForReadyRead(5000)){
+        showStatusMessage("<font color='red'>No reply");
+        makeDisconnection();
+        return;
+    }
+
     ui->wiegand_label->setText(QString::number(value));
     if(bSettings->modeSettings().mode){
         ui->enter_number_label->setText(QString::number(bSettings->modeSettings().bareerNumber));
@@ -123,14 +112,6 @@ void MainWindow::wiegandCallback(quint32 value)
     else {
         ui->exit_number_label->setText(QString::number(bSettings->modeSettings().bareerNumber));
     }
-    QByteArray Buffer;
-    QDataStream out(&Buffer,QIODevice::WriteOnly);
-    out.setVersion(QDataStream::Qt_5_5);
-
-    out<<false<<value;
-
-    bsocket->write(Buffer);
-    if(!bsocket->waitForReadyRead())showStatusMessage("<font color='red'>No reply");
 }
 
 void MainWindow::readSocket()
@@ -149,19 +130,12 @@ void MainWindow::readSocket()
 
     switch (replyNumber)
     {
-    //Setting up
-    case Replies::DVR_ERROR:{
-
-        showStatusMessage("<font color='red'>DVR Error");
-        makeDisconnection();
+    //ENTER mode
+    case Replies::WIEGAND_REGISTERED:{
+        showStatusMessage(QString("<font color='green'>Successfully registered! : %1").arg(timer.elapsed()));
+        openBareer();
         return;
     }
-    case Replies::SET_UP:{
-        showStatusMessage("<font color='green'>Successfully Set UP");
-        return;
-    }
-
-        //ENTER mode
     case Replies::WIEGAND_ALREADY_REGISTERED:{
         QDateTime in_time;
         quint8 in_number;
@@ -172,30 +146,12 @@ void MainWindow::readSocket()
         ui->enter_number_label->setText(QString::number(in_number));
 
         showStatusMessage("<font color='green'>WIEGAND ID is already registered!");
-        bWiegand->openBareer();
+        openBareer();
         return;
     }
-    case Replies::SNAPSHOT_FAIL:{
-
-        showStatusMessage("<font color='red'>Snapshot failed! Please try again!");
-        return;
-    }
-    case Replies::WIEGAND_REGISTERED:{
-
-        showStatusMessage("<font color='green'>Successfully registered!");
-        bWiegand->openBareer();
-        return;
-    }
-
         //EXIT mode
-    case Replies::WIEGAND_NOT_REGISTERED:{
-
-        showStatusMessage("<font color='red'>WIEGAND ID is not registered!");
-        return;
-    }
-
-    case Replies::WIEGAND_ALREADY_DEACTIVATED:
-    case Replies::WIEGAND_DEACTIVATED:{
+    case Replies::WIEGAND_DEACTIVATED:
+    case Replies::WIEGAND_ALREADY_DEACTIVATED:{
         QDateTime in_time;
         QDateTime out_time;
         quint8 in_number;
@@ -219,12 +175,32 @@ void MainWindow::readSocket()
         showStatusMessage("<font color='green'>WIEGAND ID is deactivated");
 
         print();
-        bWiegand->openBareer();
+        openBareer();
+        return;
+    }
+    case Replies::WIEGAND_NOT_REGISTERED:{
+        showStatusMessage("<font color='red'>WIEGAND ID is not registered!");
+        return;
+    }
+        //Setting up
+    case Replies::SET_UP:{
+
+        showStatusMessage(QString("<font color='green'>Successfully Set UP : %1").arg(timer.elapsed()));
+        return;
+    }
+    case Replies::DVR_ERROR:{
+        showStatusMessage("<font color='red'>DVR Error");
+        makeDisconnection();
+        return;
+    }
+    case Replies::SNAPSHOT_FAIL:{
+        showStatusMessage("<font color='red'>Snapshot failed! Please try again!");
         return;
     }
     case Replies::INVALID:
     default:{
         showStatusMessage("Undefined error!");
+        makeDisconnection();
     }
     }
 }
@@ -280,7 +256,6 @@ void MainWindow::initActionsConnections()
     connect(ui->actionConnect,&QAction::triggered, this, &MainWindow::makeConnection);
     connect(ui->actionDisconnect, &QAction::triggered, this, &MainWindow::makeDisconnection);
     connect(ui->actionPrint, &QAction::triggered, this, &MainWindow::print);
-    connect(ui->actionPrinterSettings, &QAction::triggered, [this](){bPrintDialog->exec();});
 }
 
 void MainWindow::readSettings()
@@ -321,18 +296,6 @@ void MainWindow::readSettings()
     dvr.connectionMethod = settings.value("dvr_connectionMethod",quint8()).toUInt();
 
     bSettings->setDvrSettings(dvr);
-
-    SettingsDialog::WiegandSettings wiegand;
-    wiegand.gpio_0 = settings.value("wiegand_gpio_0",quint8()).toUInt();
-    wiegand.gpio_1 = settings.value("wiegand_gpio_1",quint8()).toUInt();
-    wiegand.bareerPin = settings.value("bareer_pin", quint8()).toUInt();
-    bSettings->setWiegandSettings(wiegand);
-
-    if(mode.mode){
-        ui->duration_label->setVisible(false);
-        ui->price_label->setVisible(false);
-        ui->label_5->setVisible(false);
-    }
 }
 
 void MainWindow::writeSettings()
@@ -356,11 +319,13 @@ void MainWindow::writeSettings()
     settings.setValue("dvr_password",dvr.password);
     settings.setValue("dvr_port",dvr.port);
     settings.setValue("dvr_connectionMethod",dvr.connectionMethod);
+}
 
-    SettingsDialog::WiegandSettings wiegand = bSettings->wiegandSettings();
-    settings.setValue("wiegand_gpio_0",wiegand.gpio_0);
-    settings.setValue("wiegand_gpio_1",wiegand.gpio_1);
-    settings.setValue("bareer_pin",wiegand.bareerPin);
+void MainWindow::openBareer()
+{
+    digitalWrite(BAREER_PIN,HIGH);
+    delay(500);
+    digitalWrite(BAREER_PIN,LOW);
 }
 
 void MainWindow::setUpServer()
@@ -374,7 +339,15 @@ void MainWindow::setUpServer()
      <<bSettings->modeSettings().mode
     <<bSettings->dvrSettings().host;
 
+    timer.start();
     bsocket->write(Buffer);
-    if(!bsocket->waitForReadyRead())
+    if(!bsocket->waitForReadyRead(5000)){
         showStatusMessage("<font color='red'>No reply");
+        makeDisconnection();
+    }
+}
+
+void MainWindow::on_actionPrinterSettings_triggered()
+{
+    wiegandCallback(111222333);
 }

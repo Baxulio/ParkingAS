@@ -2,15 +2,16 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QPrinter>
+#include <QTcpSocket>
 #include <QAbstractSocket>
 
-#include <QPrinter>
-#include <QPrintDialog>
-
-#include <QTcpSocket>
-#include <QLabel>
 #include "SettingsDialog.h"
-#include "WiegandWiring.h"
+#include "Core.h"
+#include "wiringPi.h"
+
+#include <QElapsedTimer>
+#include <QLabel>
 
 namespace Ui {
 class MainWindow;
@@ -22,13 +23,13 @@ class MainWindow : public QMainWindow
 private:
     Ui::MainWindow *ui;
     SettingsDialog *bSettings;
-    QLabel *label;
-WiegandWiring *bWiegand;
+
     QTcpSocket *bsocket;
     QDataStream in;
 
-    QPrintDialog *bPrintDialog;
     QPrinter bPrinter;
+    QLabel *label;
+    QElapsedTimer timer;
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
@@ -47,6 +48,8 @@ private slots:
 
     void print();
 
+    void on_actionPrinterSettings_triggered();
+
 public slots:
     void wiegandCallback(quint32 value);
     void showStatusMessage(const QString &message);
@@ -57,6 +60,8 @@ private:
 
     void readSettings();
     void writeSettings();
+
+    void openBareer();
 
 };
 
