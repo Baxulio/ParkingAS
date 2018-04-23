@@ -9,7 +9,7 @@
 #include <netsdk.h>
 
 #include "Core.h"
-#include <QStandardPaths>
+//#include <QStandardPaths>
 
 // When the thread pool kicks up
 // it's going to hit this run, and it's going to do this time consuming task.
@@ -36,6 +36,7 @@ void MyTask::run()
                   "FROM `Parking`.`Active` WHERE `Active`.`rf_id`=:rf_id;");
     query.bindValue(":rf_id",bWiegand);
     if(!query.exec()){
+        emit Result(Replies::INVALID);
         qDebug()<<query.lastError().text();
         return;
     }
@@ -51,11 +52,10 @@ void MyTask::run()
                         query.value("in_number").toUInt());
             return;
         }
-
-        //        if(!snapshot(b_out_time)){
-        //            emit Result(Replies::SNAPSHOT_FAIL);
-        //            return;
-        //        }
+//        if(!snapshot(b_out_time)){
+//            emit Result(Replies::SNAPSHOT_FAIL);
+//            return;
+//        }
 
         query.prepare("INSERT INTO `Parking`.`Active`(`rf_id`, `in_time`, `in_number`, `img`) "
                       "VALUES(:b_rf_id,:b_in_time,:b_in_number,:b_img);");
@@ -65,6 +65,7 @@ void MyTask::run()
         query.bindValue(":b_img", cFileName);
 
         if(!query.exec()){
+            emit Result(Replies::INVALID);
             qDebug()<<query.lastError().text();
             return;
         }
@@ -77,7 +78,8 @@ void MyTask::run()
         if(!query.isValid()){
             if(!query.exec("SELECT in_time, in_number, out_time, price "
                            "FROM History "
-                           "WHERE out_time >= DATE_SUB(NOW() , INTERVAL 1/3 MINUTE)")){
+                           "WHERE out_time >= DATE_SUB(NOW() , INTERVAL 1 MINUTE)")){
+                emit Result(Replies::INVALID);
                 qDebug()<<query.lastError().text();
                 return;
             }
@@ -94,10 +96,10 @@ void MyTask::run()
             return;
         }
 
-        //        if(!snapshot(b_out_time)){
-        //            emit Result(Replies::SNAPSHOT_FAIL);
-        //            return;
-        //        }
+//        if(!snapshot(b_out_time)){
+//            emit Result(Replies::SNAPSHOT_FAIL);
+//            return;
+//        }
 
         int b_id = query.value("id").toInt();
         QDateTime b_in_time = query.value("in_time").toDateTime();
@@ -154,8 +156,8 @@ void MyTask::run()
 
 bool MyTask::snapshot(const QDateTime &time)
 {
-    QString fileName = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation)+
-            QString("/Parking/%1%2%3_%4%5%6_%7.jpeg")
+    QString fileName = /*QStandardPaths::writableLocation(QStandardPaths::PicturesLocation)*/
+            QString("/home/bahman/Pictures/Parking/%1%2%3_%4%5%6_%7.jpeg")
             .arg(time.date().year())
             .arg(time.date().month())
             .arg(time.date().day())

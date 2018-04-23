@@ -10,14 +10,14 @@ MyClient::MyClient(QObject *parent) :
 {
     QThreadPool::globalInstance()->setMaxThreadCount(10);
 
-    //    BOOL b = H264_DVR_Init(
-    //                (fDisConnect)&MyClient::fDisConnectBackCallFunc,
-    //                1);
+//    H264_DVR_Init(
+//                (fDisConnect)&MyClient::fDisConnectBackCallFunc,
+//                1);
 }
 
 MyClient::~MyClient()
 {
-    //    H264_DVR_Cleanup();
+    //H264_DVR_Cleanup();
 }
 
 void MyClient::setSocket(qintptr descriptor)
@@ -37,7 +37,7 @@ void MyClient::setSocket(qintptr descriptor)
 
 void MyClient::fDisConnectBackCallFunc(long lLoginID, char *pchDVRIP, long nDVRPort, unsigned long dwUser)
 {
-    //    H264_DVR_Logout(lLoginID);
+    //H264_DVR_Logout(lLoginID);
 }
 
 // asynchronous - runs separately from the thread we created
@@ -50,6 +50,7 @@ void MyClient::connected()
 // asynchronous
 void MyClient::disconnected()
 {
+    //H264_DVR_Logout(loginId);
     qDebug() << "Client disconnected";
 }
 
@@ -78,12 +79,11 @@ void MyClient::readyRead()
 
         if(!in.commitTransaction())
             return;
-        //        if(!setDVR()){
-        //            emit TaskResult(Replies::DVR_ERROR);
-        //            return;
-        //        }
-        loginId=1; //test test test
-
+//        if(!setDVR()){
+//            emit TaskResult(Replies::DVR_ERROR);
+//            return;
+//        }
+loginId=1;
         emit TaskResult(Replies::SET_UP);
         return;
     }
@@ -119,7 +119,13 @@ void MyClient::TaskResult(int Number, QDateTime in_time, quint8 in_number, QDate
 
     out<<Number;
 
-    if(Number == Replies::WIEGAND_ALREADY_REGISTERED){
+    if(Number == Replies::WIEGAND_DEACTIVATED || Number == Replies::WIEGAND_ALREADY_DEACTIVATED){
+        out<<in_time;
+        out<<in_number;
+        out<<out_time;
+        out<<price;
+    }
+    else if(Number == Replies::WIEGAND_ALREADY_REGISTERED){
         out<<in_time;
         out<<in_number;
     }
@@ -128,12 +134,6 @@ void MyClient::TaskResult(int Number, QDateTime in_time, quint8 in_number, QDate
         out<<in_time;
         out<<in_number;
         out<<out_time;
-    }
-    else if(Number == Replies::WIEGAND_DEACTIVATED || Number == Replies::WIEGAND_ALREADY_DEACTIVATED){
-        out<<in_time;
-        out<<in_number;
-        out<<out_time;
-        out<<price;
     }
 
     socket->write(Buffer);
