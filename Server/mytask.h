@@ -1,11 +1,8 @@
-// mytask.h
-
 #ifndef MYTASK_H
 #define MYTASK_H
 
 #include <QRunnable>
 #include <QObject>
-#include <QRunnable>
 
 #include <QDateTime>
 

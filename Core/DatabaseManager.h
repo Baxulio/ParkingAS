@@ -3,6 +3,9 @@
 
 #include <memory>
 #include <QString>
+#include <QSqlError>
+#include <QSqlQuery>
+//#include <QDebug>
 
 #include "core_global.h"
 
@@ -18,9 +21,8 @@ public:
     static DatabaseManager& instance();
     ~DatabaseManager();
 
-    QSqlError connect(const QString& path = "Parking" ,const QString& host = "localhost", const QString& login = "Parking", const QString& password = "", int port = 3306);
+    QSqlError connect(const QString& path = "Parking" ,const QString& host = "localhost", const QString& login = "Server", const QString& password = "", int port = 3306);
     void closeConnection();
-    void reconnect();
 
 protected:
     DatabaseManager();
@@ -28,12 +30,6 @@ protected:
 
 public:
     std::unique_ptr<QSqlDatabase> bDatabase;
-//private:
-//    QString path;
-//    QString host;
-//    QString login;
-//    QString password;
-//    int port;
 };
 
 #endif // DATABASEMANAGER_H

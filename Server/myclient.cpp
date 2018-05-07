@@ -1,11 +1,13 @@
-// myclient.cpp
-
 #include "myclient.h"
+
 #include <QDataStream>
+
 #include "Core.h"
+
 #include <QSqlQuery>
-#include <QDebug>
 #include <QSqlError>
+
+//#include <QDebug>
 
 MyClient::MyClient(QObject *parent) :
     QObject(parent),
@@ -27,7 +29,7 @@ void MyClient::setSocket(qintptr descriptor)
 {
     // make a new socket
     socket = new QTcpSocket(this);
-    qDebug() << "A new socket created!";
+    //qDebug() << "A new socket created!";
 
     connect(socket, SIGNAL(connected()), this, SLOT(connected()));
     connect(socket, SIGNAL(disconnected()), this, SLOT(disconnected()));
@@ -35,7 +37,7 @@ void MyClient::setSocket(qintptr descriptor)
 
     socket->setSocketDescriptor(descriptor);
 
-    qDebug() << " Client connected at " << descriptor;
+    //qDebug() << " Client connected at " << descriptor;
 }
 
 void MyClient::fDisConnectBackCallFunc(long lLoginID, char *pchDVRIP, long nDVRPort, unsigned long dwUser)
@@ -46,15 +48,14 @@ void MyClient::fDisConnectBackCallFunc(long lLoginID, char *pchDVRIP, long nDVRP
 // asynchronous - runs separately from the thread we created
 void MyClient::connected()
 {
-    qDebug() << "Client connected event";
-
+    //qDebug() << "Client connected event";
 }
 
 // asynchronous
 void MyClient::disconnected()
 {
     H264_DVR_Logout(loginId);
-    qDebug() << "Client disconnected";
+    //qDebug() << "Client disconnected";
 }
 
 // Our main thread of execution
@@ -64,7 +65,7 @@ void MyClient::disconnected()
 
 void MyClient::readyRead()
 {
-    qDebug() << "MyClient::readyRead()";
+    //qDebug() << "MyClient::readyRead()";
 
     QByteArray arr=socket->readAll();
     QDataStream in(&arr,QIODevice::ReadOnly);
@@ -86,6 +87,7 @@ void MyClient::readyRead()
             emit TaskResult(Replies::DVR_ERROR);
         }
         else emit TaskResult(Replies::SET_UP);
+
         return;
     }
 
@@ -96,23 +98,6 @@ void MyClient::readyRead()
         return;
     QSqlQuery query;
 
-//    query.prepare("INSERT INTO `Parking`.`Cards`"
-//                  "(`priceId`,"
-//                  "`code`,"
-//                  "`subscription`,"
-//                  "`is_valid`)"
-//                  "VALUES"
-//                  "(2,"
-//                  ":code,"
-//                  "0,"
-//                  "0);");
-//    query.bindValue(":code",wiegand);
-//    if(!query.exec()){
-//        emit TaskResult(Replies::INVALID);
-//        qDebug()<<query.lastError().text();
-//        return;
-//    }
-//    else emit TaskResult(Replies::WIEGAND_REGISTERED);
     // Time consumer
     MyTask *mytask = new MyTask(wiegand,
                                 dvrip,
@@ -125,7 +110,7 @@ void MyClient::readyRead()
     connect(mytask, &MyTask::Result,
             this, &MyClient::TaskResult, Qt::QueuedConnection);
 
-    qDebug() << "Starting a new task using a thread from the QThreadPool";
+//    qDebug() << "Starting a new task using a thread from the QThreadPool";
 
     // QThreadPool::globalInstance() returns global QThreadPool instance
     QThreadPool::globalInstance()->start(mytask);
@@ -168,10 +153,9 @@ bool MyClient::setDVR()
     H264_DVR_SetConnectTime(3000, 1);
     //		H264_DVR_SetLocalBindAddress("10.2.55.25");
 
-    QByteArray ba = dvrip.toLatin1();
-    char *charDVRip = ba.data();
+    char *charDVRip = dvrip.toLatin1().data();
 
-    qDebug()<<charDVRip;
+//    qDebug()<<charDVRip;
 
     loginId = H264_DVR_Login(charDVRip, 34567, "admin", "",
                              &OutDev, &nEroor,SocketStyle::TCPSOCKET);
@@ -182,15 +166,15 @@ bool MyClient::setDVR()
 
         if(nErr == H264_DVR_PASSWORD_NOT_VALID)
         {
-            qDebug()<<"Error: password error";
+//            qDebug()<<"Error: password error";
         }
         else
         {
-            qDebug()<<"Error: not found";
+//            qDebug()<<"Error: not found";
         }
         return false;
     }
-    qDebug()<<"Camera Connected";
+//    qDebug()<<"Camera Connected";
     return true;
 }
 

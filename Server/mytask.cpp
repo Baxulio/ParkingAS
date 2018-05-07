@@ -1,16 +1,12 @@
-// mytask.cpp
-
 #include "mytask.h"
-#include <QDebug>
-
-#include <QSqlQuery>
-#include <QSqlError>
 
 #include <netsdk.h>
 
 #include "Core.h"
 #include "DatabaseManager.h"
-//#include <QStandardPaths>
+#include <QVariant>
+
+#include <QStandardPaths>
 
 // When the thread pool kicks up
 // it's going to hit this run, and it's going to do this time consuming task.
@@ -26,7 +22,7 @@ MyTask::MyTask(quint32 wiegand, QString dvrip, quint8 bareerNo, bool bareerMode,
     bBareerMode(bareerMode),
     bLoginId(loginId)
 {
-    qDebug() << "MyTask()";
+//    qDebug() << "MyTask()";
 }
 
 void MyTask::run()
@@ -160,8 +156,8 @@ void MyTask::run()
 
 bool MyTask::snapshot(const QDateTime &time)
 {
-    QString fileName = /*QStandardPaths::writableLocation(QStandardPaths::PicturesLocation)*/
-            QString("/home/bahman/Pictures/Parking/%1%2%3_%4%5%6_%7.jpeg")
+    QString fileName = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation)+
+            QString("/Parking/%1%2%3_%4%5%6_%7.jpeg")
             .arg(time.date().year())
             .arg(time.date().month())
             .arg(time.date().day())
@@ -184,7 +180,7 @@ double MyTask::calculate_formula(const QString &formula, const quint64 &secs)
     QStringList priceList = formula.split(';',QString::SkipEmptyParts);
     foreach (QString str, priceList) {
         pair = str.split(':',QString::SkipEmptyParts);
-        if(pair[0]==0 || mins<=QString(pair[0]).toDouble()){
+        if(mins<=QString(pair[0]).toDouble()){
             return QString(pair[1]).toDouble();
         }
     }

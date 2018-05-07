@@ -1,29 +1,28 @@
-// myclient.h
-
 #ifndef MYCLIENT_H
 #define MYCLIENT_H
 
 #include <QObject>
+
 #include <QTcpSocket>
-#include <QDebug>
 #include <QThreadPool>
+
 #include "mytask.h"
 #include "netsdk.h"
+
 #include <QDateTime>
 
 class MyClient : public QObject
 {
     Q_OBJECT
+
 public:
     explicit MyClient(QObject *parent = 0);
     ~MyClient();
 
     void setSocket(qintptr Descriptor);
 
-
     void CALLBACK fDisConnectBackCallFunc(LONG lLoginID, char *pchDVRIP,
                                 LONG nDVRPort, DWORD dwUser);
-
 signals:
 
 public slots:
@@ -45,6 +44,7 @@ private:
     quint8 bareerNo;  //bareer Number
     bool bareerMode;  //ENTER or EXIT
     long loginId;
+
 private:
     bool setDVR();
 };

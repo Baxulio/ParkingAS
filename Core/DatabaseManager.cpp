@@ -1,22 +1,19 @@
 #include "DatabaseManager.h"
 
 #include <QSqlDatabase>
-#include <QDebug>
-#include <QSqlError>
-#include <QSqlQuery>
 
 void DatabaseManager::debugQuery(const QSqlQuery& query)
 {
-//    if (query.lastError().type() == QSqlError::ErrorType::NoError) {
-//        qDebug() << "Query OK:"  << query.lastQuery();
-//    } else {
-//        qWarning() << "Query KO:" << query.lastError().text();
-//        qWarning() << "Query text:" << query.lastQuery();
-//    }
-    if(query.lastError().number()==2006){
+    if (query.lastError().type() != QSqlError::ErrorType::NoError
+            || query.lastError().number()==2006) {
         instance().bDatabase->close();
         instance().bDatabase->open();
+        //        qWarning() << "Query KO:" << query.lastError().text();
+        //        qWarning() << "Query text:" << query.lastQuery();
     }
+    //    else {
+    //        qDebug() << "Query OK:"  << query.lastQuery();
+    //    }
 }
 
 DatabaseManager&DatabaseManager::instance()
@@ -32,12 +29,6 @@ DatabaseManager::~DatabaseManager()
 
 QSqlError DatabaseManager::connect(const QString &path, const QString &host, const QString &login, const QString &password, int port)
 {
-//    this->path=path;
-//    this->host=host;
-//    this->login=login;
-//    this->password=password;
-//    this->port=port;
-
     QSqlError err;
     bDatabase->setDatabaseName(path);
     bDatabase->setHostName(host);
@@ -51,11 +42,6 @@ QSqlError DatabaseManager::connect(const QString &path, const QString &host, con
 void DatabaseManager::closeConnection()
 {
     bDatabase->close();
-}
-
-void DatabaseManager::reconnect()
-{
-    bDatabase->open();
 }
 
 DatabaseManager::DatabaseManager():
