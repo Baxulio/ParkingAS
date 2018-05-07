@@ -117,7 +117,7 @@ void MainWindow::makeDisconnection()
     bDb.closeConnection();
     ui->actionConnect->setEnabled(true);
     ui->actionDisconnect->setEnabled(false);
-    showStatusMessage("<font color='gray'>Successfully Disconnected!");
+    //showStatusMessage("<font color='gray'>Disconnected!");
 }
 
 void MainWindow::print()
