@@ -18,6 +18,7 @@ PriceRules::PriceRules(QWidget *parent) :
 
     SubscriptionDelegate *delegate = new SubscriptionDelegate(ui->code_table);
     ui->code_table->setItemDelegateForColumn(3,delegate);
+    ui->code_table->setItemDelegateForColumn(4,delegate);
 
     priceModel->setEditStrategy(QSqlTableModel::OnManualSubmit);
     cardsModel->setEditStrategy(QSqlTableModel::OnManualSubmit);
@@ -26,6 +27,7 @@ PriceRules::PriceRules(QWidget *parent) :
     priceModel->setHeaderData(2, Qt::Horizontal, "Формула цены", Qt::DisplayRole);
     cardsModel->setHeaderData(2, Qt::Horizontal, "Код карты", Qt::DisplayRole);
     cardsModel->setHeaderData(3, Qt::Horizontal, "Абонемент [1:Фиксирован; 0:Отменен]", Qt::DisplayRole);
+    cardsModel->setHeaderData(4, Qt::Horizontal, "Грядущий месяц [1:Фиксирован; 0:Отменен]", Qt::DisplayRole);
 
     ui->price_table->setModel(priceModel);
     ui->price_table->hideColumn(0);

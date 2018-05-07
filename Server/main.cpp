@@ -6,7 +6,7 @@
 const QString DATABASE = "Parking";
 const QString HOST = "localhost";
 const QString USER = "Parking";
-const QString PASSWORD = "";
+const QString PASSWORD = "parking12345";
 const int PORT = 3306;
 
 int main(int argc, char *argv[])

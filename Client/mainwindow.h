@@ -65,6 +65,14 @@ private slots:
 
     void on_priceRules_triggered();
 
+    void on_total_price_for_today_but_clicked();
+
+    double on_filtred_pric_but_clicked();
+
+    void on_reset_cards_clicked();
+
+    void on_archive_but_clicked();
+
 private:
     void initActionsConnections();
 

@@ -3,6 +3,9 @@
 #include "myclient.h"
 #include <QDataStream>
 #include "Core.h"
+#include <QSqlQuery>
+#include <QDebug>
+#include <QSqlError>
 
 MyClient::MyClient(QObject *parent) :
     QObject(parent),
@@ -10,14 +13,14 @@ MyClient::MyClient(QObject *parent) :
 {
     QThreadPool::globalInstance()->setMaxThreadCount(10);
 
-//    H264_DVR_Init(
-//                (fDisConnect)&MyClient::fDisConnectBackCallFunc,
-//                1);
+    H264_DVR_Init(
+                (fDisConnect)&MyClient::fDisConnectBackCallFunc,
+                1);
 }
 
 MyClient::~MyClient()
 {
-    //H264_DVR_Cleanup();
+    H264_DVR_Cleanup();
 }
 
 void MyClient::setSocket(qintptr descriptor)
@@ -37,7 +40,7 @@ void MyClient::setSocket(qintptr descriptor)
 
 void MyClient::fDisConnectBackCallFunc(long lLoginID, char *pchDVRIP, long nDVRPort, unsigned long dwUser)
 {
-    //H264_DVR_Logout(lLoginID);
+    H264_DVR_Logout(lLoginID);
 }
 
 // asynchronous - runs separately from the thread we created
@@ -50,7 +53,7 @@ void MyClient::connected()
 // asynchronous
 void MyClient::disconnected()
 {
-    //H264_DVR_Logout(loginId);
+    H264_DVR_Logout(loginId);
     qDebug() << "Client disconnected";
 }
 
@@ -79,12 +82,10 @@ void MyClient::readyRead()
 
         if(!in.commitTransaction())
             return;
-//        if(!setDVR()){
-//            emit TaskResult(Replies::DVR_ERROR);
-//            return;
-//        }
-loginId=1;
-        emit TaskResult(Replies::SET_UP);
+        if(!setDVR()){
+            emit TaskResult(Replies::DVR_ERROR);
+        }
+        else emit TaskResult(Replies::SET_UP);
         return;
     }
 
@@ -93,6 +94,25 @@ loginId=1;
 
     if(!in.commitTransaction())
         return;
+    QSqlQuery query;
+
+//    query.prepare("INSERT INTO `Parking`.`Cards`"
+//                  "(`priceId`,"
+//                  "`code`,"
+//                  "`subscription`,"
+//                  "`is_valid`)"
+//                  "VALUES"
+//                  "(2,"
+//                  ":code,"
+//                  "0,"
+//                  "0);");
+//    query.bindValue(":code",wiegand);
+//    if(!query.exec()){
+//        emit TaskResult(Replies::INVALID);
+//        qDebug()<<query.lastError().text();
+//        return;
+//    }
+//    else emit TaskResult(Replies::WIEGAND_REGISTERED);
     // Time consumer
     MyTask *mytask = new MyTask(wiegand,
                                 dvrip,
