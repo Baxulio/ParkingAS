@@ -24,6 +24,10 @@ MainWindow::MainWindow(QWidget *parent) :
     readSettings();
     initActionsConnections();
 
+    connectingGIF.setFileName(":/images/notConnected.gif");
+    waitingGIF.setFileName(":/images/wave.gif");
+
+    //connect(&timer, &QTimer::timeout, this, &MainWindow::setWaitingState);
     connect(bsocket, &QTcpSocket::readyRead, this, &MainWindow::readSocket);
     connect(bsocket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(displaySocketError(QAbstractSocket::SocketError)));
 }
@@ -70,10 +74,9 @@ void MainWindow::makeConnection()
     //////////
     bsocket->connectToHost(bSettings->serverSettings().host,bSettings->serverSettings().port);
     if(!bsocket->waitForConnected(5000)){
-        showStatusMessage(QString("<font color='red'>%1").arg(bsocket->errorString()));
-        makeDisconnection();
         return;
     }
+
     setUpServer();
 
     ui->actionConnect->setEnabled(false);
@@ -86,11 +89,15 @@ void MainWindow::makeDisconnection()
 
     ui->actionConnect->setEnabled(true);
     ui->actionDisconnect->setEnabled(false);
+
+    ui->icon_label->setText("<p align=\"center\"><img src=\":/images/warning.png\"/><br/></p><p align=\"center\"><span style=\" font-size:36pt; font-weight:600; color:#ca7b29;\">НЕТ ПОДКЛЮЧЕНИЯ!</span></p>");
+    ui->info_label->setText("<span style=\"font-size:26pt; color:#7e7e7e;\">Не удалось наладить сеть!");
+
+    //makeConnection();
 }
 
 void MainWindow::wiegandCallback(quint32 value)
 {
-    timer.start();
     QByteArray Buffer;
     QDataStream out(&Buffer,QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_5_5);
@@ -99,19 +106,12 @@ void MainWindow::wiegandCallback(quint32 value)
 
     bsocket->write(Buffer);
     if(!bsocket->waitForReadyRead(5000)){
-        showStatusMessage("<font color='red'>No reply");
-        makeDisconnection();
+        bsocket->flush();
+        ui->icon_label->setText("<p align=\"center\"><img src=\":/images/warning.png\"/><br/></p><p align=\"center\"><span style=\" font-size:36pt; font-weight:600; color:#ca7b29;\">НЕУДАЧА!</span></p>");
+        ui->info_label->setText("<span style=\"font-size:26pt; color:#7e7e7e;\">Повторите попытку !");
         return;
     }
-
-    ui->wiegand_label->setText(QString::number(value));
-    if(bSettings->modeSettings().mode){
-        ui->enter_number_label->setText(QString::number(bSettings->modeSettings().bareerNumber));
-        ui->enter_time_label->setText(QDateTime::currentDateTime().toString());
-    }
-    else {
-        ui->exit_number_label->setText(QString::number(bSettings->modeSettings().bareerNumber));
-    }
+    ui->info_label->setText(QString("<p><span style=\" font-size:26pt; color:#7e7e7e;\">Код карты : </span><span style=\" font-size:26pt; font-weight:600; color:#7e7e7e;\">%1</span></p>").arg(value));
 }
 
 void MainWindow::readSocket()
@@ -122,7 +122,9 @@ void MainWindow::readSocket()
     in.setVersion(QDataStream::Qt_5_5);
 
     if(in.status()==QDataStream::ReadCorruptData){
-        showStatusMessage("Try one more time!");
+        bsocket->flush();
+        ui->icon_label->setText("<p align=\"center\"><img src=\":/images/warning.png\"/><br/></p><p align=\"center\"><span style=\" font-size:36pt; font-weight:600; color:#ca7b29;\">НЕУДАЧА!</span></p>");
+        ui->info_label->setText("<span style=\"font-size:26pt; color:#7e7e7e;\">Повторите попытку !");
         return;
     }
     int replyNumber;
@@ -132,7 +134,8 @@ void MainWindow::readSocket()
     {
     //ENTER mode
     case Replies::WIEGAND_REGISTERED:{
-        showStatusMessage(QString("<font color='green'>Successfully registered! : %1").arg(timer.elapsed()));
+        waitingGIF.stop();
+        ui->icon_label->setText("<p align=\"center\"><img src=\":/images/149_check_ok-512.png\"/><br/></p><p align=\"center\"><span style=\" font-size:36pt; font-weight:600; color:#8dc63f;\">УСПЕШНО!</span></p>");
         openBareer();
         return;
     }
@@ -141,11 +144,9 @@ void MainWindow::readSocket()
         quint8 in_number;
 
         in>>in_time>>in_number;
-
-        ui->enter_time_label->setText(in_time.toString());
-        ui->enter_number_label->setText(QString::number(in_number));
-
-        showStatusMessage("<font color='green'>WIEGAND ID is already registered!");
+        ui->icon_label->setText("<p align=\"center\"><img src=\":/images/149_check_ok-512.png\"/><br/></p><p align=\"center\"><span style=\" font-size:36pt; font-weight:600; color:#8dc63f;\">УЖЕ ЗАРЕГИСТРИРОВАН!</span></p>");
+        ui->in_time_label->setText(QString("<body><p><span style=\" font-size:26pt; color:#7e7e7e;\">Время въезда : </span><span style=\" font-size:26pt; font-weight:600; color:#7e7e7e;\">%1</span></p>").arg(in_time.toString()));
+        ui->in_out_number_label->setText(QString("<body><p><span style=\" font-size:26pt; color:#7e7e7e;\">Въезд № : </span><span style=\" font-size:26pt; font-weight:600; color:#7e7e7e;\">%1</span></p>").arg(in_number));
         openBareer();
         return;
     }
@@ -157,35 +158,39 @@ void MainWindow::readSocket()
         quint8 in_number;
         double price;
 
+
         in>>in_time>>in_number>>out_time>>price;
-        ui->enter_number_label->setText(QString::number(in_number));
-        ui->enter_time_label->setText(in_time.toString());
-        ui->exit_time_label->setText(out_time.toString());
-        ui->exit_number_label->setText(QString::number(bSettings->modeSettings().bareerNumber));
-        ui->price_label->setText(QString("%1").arg(price));
 
         int diff = in_time.time().secsTo(out_time.time());
-
         int hours = diff/3600;
         int minutes = (diff%3600)/60;
         int secs = (diff%3600)%60;
         QTime time(hours,minutes,secs);
-        ui->duration_label->setText(time.toString());
 
-        showStatusMessage("<font color='green'>WIEGAND ID is deactivated");
+        ui->icon_label->setText(QString("<p align=\"center\"><span style=\" font-size:72pt;\">%1</span></p>"
+                                "<p align=\"center\"><span style=\" font-size:100pt; color:#8dc63f;\">%2 </span><span style=\" font-size:48pt; color:#b6b6b6;\">(UZS)</span></p>"
+                                "<p align=\"center\"><br/></p><p align=\"center\"><span style=\" font-size:36pt; font-weight:600; color:#8dc63f;\">ДОБРОГО ВАМ ПУТИ!</span></p>")
+                                .arg(time.toString()).arg(price));
+
+
+
+        ui->in_time_label->setText(QString("<body><p><span style=\" font-size:26pt; color:#7e7e7e;\">Время въезда : </span><span style=\" font-size:26pt; font-weight:600; color:#7e7e7e;\">%1</span></p>").arg(in_time.toString()));
+        ui->out_time_label->setText(QString("<body><p><span style=\" font-size:26pt; color:#7e7e7e;\">Время выезда : </span><span style=\" font-size:26pt; font-weight:600; color:#7e7e7e;\">%1</span></p>").arg(out_time.toString()));
+        ui->in_out_number_label->setText(QString("<body><p><span style=\" font-size:26pt; color:#7e7e7e;\">Въезд № : </span><span style=\" font-size:26pt; font-weight:600; color:#7e7e7e;\">%1</span></p>").arg(in_number));
 
         print();
         openBareer();
         return;
     }
     case Replies::WIEGAND_NOT_REGISTERED:{
-        showStatusMessage("<font color='red'>WIEGAND ID is not registered!");
+        ui->icon_label->setText("<p align=\"center\"><img src=\":/images/warning.png\"/><br/></p><p align=\"center\"><span style=\" font-size:36pt; font-weight:600; color:#ca7b29;\">ОШИБКА!</span></p>");
+        ui->info_label->setText("<span style=\"font-size:26pt; color:#7e7e7e;\">Карта не зафиксирована при въезде!");
         return;
     }
         //Setting up
     case Replies::SET_UP:{
-
-        showStatusMessage(QString("<font color='green'>Successfully Set UP : %1").arg(timer.elapsed()));
+        ui->icon_label->setText("<p align=\"center\"><img src=\":/images/149_check_ok-512.png\"/><br/></p><p align=\"center\"><span style=\" font-size:36pt; font-weight:600; color:#ca7b29;\">ПОДКЛЮЧЕНО!</span></p>");
+        ui->info_label->setText("<span style=\"font-size:26pt; color:#7e7e7e;\">Приложите карту!");
         return;
     }
     case Replies::DVR_ERROR:{
@@ -194,7 +199,9 @@ void MainWindow::readSocket()
         return;
     }
     case Replies::SNAPSHOT_FAIL:{
-        showStatusMessage("<font color='red'>Snapshot failed! Please try again!");
+        bsocket->flush();
+        ui->icon_label->setText("<p align=\"center\"><img src=\":/images/warning.png\"/><br/></p><p align=\"center\"><span style=\" font-size:36pt; font-weight:600; color:#ca7b29;\">НЕУДАЧА!</span></p>");
+        ui->info_label->setText("<span style=\"font-size:26pt; color:#7e7e7e;\">Не удалось снять на камеру!");
         return;
     }
     case Replies::INVALID:
@@ -248,6 +255,16 @@ void MainWindow::print()
     painter.end();
 }
 
+void MainWindow::setWaitingState()
+{
+    if(connectingGIF.state()==QMovie::MovieState::Running)
+        connectingGIF.stop();
+
+    ui->icon_label->setMovie(&waitingGIF);
+    waitingGIF.start();
+    ui->info_label->setText("<span style=\"font-size:26pt; color:#7e7e7e;\">Приложите карту !");
+}
+
 void MainWindow::initActionsConnections()
 {
     connect(ui->actionQuit, &QAction::triggered, this, &MainWindow::close);
@@ -288,6 +305,9 @@ void MainWindow::readSettings()
 
     bSettings->setModeSettings(mode);
 
+    ui->bareer_label->setText(QString("<p><span style=\" font-size:14pt; color:#7e7e7e;\">Въезд № : "
+                                      "</span><span style=\" font-size:14pt; font-weight:600; color:#7e7e7e;\">%1</span></p>").
+                              arg(mode.bareerNumber));
     SettingsDialog::DVRSettings dvr;
     dvr.host = settings.value("dvr_host",QString()).toString();
     dvr.user = settings.value("dvr_user",QString()).toString();
@@ -339,15 +359,9 @@ void MainWindow::setUpServer()
      <<bSettings->modeSettings().mode
     <<bSettings->dvrSettings().host;
 
-    timer.start();
     bsocket->write(Buffer);
     if(!bsocket->waitForReadyRead(5000)){
-        showStatusMessage("<font color='red'>No reply");
         makeDisconnection();
+        return;
     }
-}
-
-void MainWindow::on_actionPrinterSettings_triggered()
-{
-    wiegandCallback(111222333);
 }
