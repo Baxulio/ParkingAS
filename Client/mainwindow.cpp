@@ -28,7 +28,9 @@
 #include <QTextDocument>
 #include <QTextStream>
 
+#include <QUrl>
 #include <QDebug>
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
@@ -173,17 +175,22 @@ void MainWindow::reloadSnapshot(const QModelIndex &index, const QModelIndex &pre
     QPixmap pix;
 
     if(ui->status_combo->currentIndex()==1){
-        path = bSettings->serverSettings().host+proxyModel->data(proxyModel->index(index.row(),3)).toString();
+        QUrl url(proxyModel->data(proxyModel->index(index.row(),3)).toString());
+
+        path = bSettings->serverSettings().host+"/"+url.fileName();
         pix.load(path);
         ui->enterSnapshot->setPixmap(pix);
     }
     else
     {
-        path = proxyModel->data(proxyModel->index(index.row(),7)).toString();
+        QUrl url(proxyModel->data(proxyModel->index(index.row(),7)).toString());
+
+        path = bSettings->serverSettings().host+"/"+url.fileName();
         pix.load(path);
         ui->enterSnapshot->setPixmap(pix);
 
-        path = proxyModel->data(proxyModel->index(index.row(),8)).toString();
+        url.setUrl(proxyModel->data(proxyModel->index(index.row(),8)).toString());
+        path = bSettings->serverSettings().host+"/"+url.fileName();
         pix.load(path);
         ui->exitSnapshot->setPixmap(pix);
     }

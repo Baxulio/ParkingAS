@@ -6,7 +6,7 @@
 #include "DatabaseManager.h"
 #include <QVariant>
 
-#include <QStandardPaths>
+//#include <QStandardPaths>
 
 // When the thread pool kicks up
 // it's going to hit this run, and it's going to do this time consuming task.
@@ -156,8 +156,8 @@ void MyTask::run()
 
 bool MyTask::snapshot(const QDateTime &time)
 {
-    QString fileName = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation)+
-            QString("/Parking/%1%2%3_%4%5%6_%7.jpeg")
+    QString fileName = /*QStandardPaths::writableLocation(QStandardPaths::PicturesLocation)+*/
+            QString("/home/gss/Pictures/Parking/%1%2%3_%4%5%6_%7.jpeg")
             .arg(time.date().year())
             .arg(time.date().month())
             .arg(time.date().day())
