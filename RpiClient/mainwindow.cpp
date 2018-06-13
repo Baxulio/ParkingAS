@@ -9,13 +9,16 @@
 #include <QDateTime>
 
 #include <QPainter>
+#include <QDebug>
+#include <QFile>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     bSettings(new SettingsDialog),
     bsocket(new QTcpSocket(this)),
-    label(new QLabel(this))
+    label(new QLabel(this)),
+    bTimer(0)
 {
     ui->setupUi(this);
 
@@ -24,12 +27,11 @@ MainWindow::MainWindow(QWidget *parent) :
     readSettings();
     initActionsConnections();
 
-    connectingGIF.setFileName(":/images/notConnected.gif");
-    waitingGIF.setFileName(":/images/wave.gif");
-
-    //connect(&timer, &QTimer::timeout, this, &MainWindow::setWaitingState);
+    connect(&timer, &QTimer::timeout, this, &MainWindow::makeConnection);
     connect(bsocket, &QTcpSocket::readyRead, this, &MainWindow::readSocket);
     connect(bsocket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(displaySocketError(QAbstractSocket::SocketError)));
+
+    makeConnection();
 }
 
 MainWindow::~MainWindow()
@@ -69,11 +71,19 @@ void MainWindow::showStatusMessage(const QString &message)
 
 void MainWindow::makeConnection()
 {
+    ui->in_out_number_label->setText("");
+    ui->in_time_label->setText("");
+    ui->out_time_label->setText("");
+
     //////////
     //SERVER//
     //////////
+
     bsocket->connectToHost(bSettings->serverSettings().host,bSettings->serverSettings().port);
     if(!bsocket->waitForConnected(5000)){
+        ui->icon_label->setText("<p align=\"center\"><img src=\":/images/warning.png\"/><br/></p><p align=\"center\"><span style=\" font-size:36pt; font-weight:600; color:#ca7b29;\">НЕТ ПОДКЛЮЧЕНИЯ!</span></p>");
+        ui->info_label->setText("<span style=\"font-size:26pt; color:#7e7e7e;\">Не удалось наладить сеть!");
+        makeDisconnection();
         return;
     }
 
@@ -81,19 +91,23 @@ void MainWindow::makeConnection()
 
     ui->actionConnect->setEnabled(false);
     ui->actionDisconnect->setEnabled(true);
+    label->setText("");
+    bTimer=0;
+    timer.stop();
 }
 
 void MainWindow::makeDisconnection()
 {
+    bTimer+=1000;
     bsocket->abort();
 
     ui->actionConnect->setEnabled(true);
     ui->actionDisconnect->setEnabled(false);
 
-    ui->icon_label->setText("<p align=\"center\"><img src=\":/images/warning.png\"/><br/></p><p align=\"center\"><span style=\" font-size:36pt; font-weight:600; color:#ca7b29;\">НЕТ ПОДКЛЮЧЕНИЯ!</span></p>");
-    ui->info_label->setText("<span style=\"font-size:26pt; color:#7e7e7e;\">Не удалось наладить сеть!");
+    //ui->icon_label->setText("<p align=\"center\"><img src=\":/images/warning.png\"/><br/></p><p align=\"center\"><span style=\" font-size:36pt; font-weight:600; color:#ca7b29;\">НЕТ ПОДКЛЮЧЕНИЯ!</span></p>");
+    //ui->info_label->setText("<span style=\"font-size:26pt; color:#7e7e7e;\">Не удалось наладить сеть!");
 
-    //makeConnection();
+    timer.start(bTimer);
 }
 
 void MainWindow::wiegandCallback(quint32 value)
@@ -104,14 +118,12 @@ void MainWindow::wiegandCallback(quint32 value)
 
     out<<false<<value;
 
+    bWiegand = value;
     bsocket->write(Buffer);
     if(!bsocket->waitForReadyRead(5000)){
-        bsocket->flush();
-        ui->icon_label->setText("<p align=\"center\"><img src=\":/images/warning.png\"/><br/></p><p align=\"center\"><span style=\" font-size:36pt; font-weight:600; color:#ca7b29;\">НЕУДАЧА!</span></p>");
-        ui->info_label->setText("<span style=\"font-size:26pt; color:#7e7e7e;\">Повторите попытку !");
-        return;
+        makeDisconnection();
     }
-    ui->info_label->setText(QString("<p><span style=\" font-size:26pt; color:#7e7e7e;\">Код карты : </span><span style=\" font-size:26pt; font-weight:600; color:#7e7e7e;\">%1</span></p>").arg(value));
+    ui->info_label->setText(QString("<span style=\" font-size:26pt; color:#7e7e7e;\">Код карты : </span><span style=\" font-size:26pt; font-weight:600; color:#7e7e7e;\">%1</span>").arg(value));
 }
 
 void MainWindow::readSocket()
@@ -120,12 +132,9 @@ void MainWindow::readSocket()
 
     QDataStream in(&arr,QIODevice::ReadOnly);
     in.setVersion(QDataStream::Qt_5_5);
-
     if(in.status()==QDataStream::ReadCorruptData){
-        bsocket->flush();
-        ui->icon_label->setText("<p align=\"center\"><img src=\":/images/warning.png\"/><br/></p><p align=\"center\"><span style=\" font-size:36pt; font-weight:600; color:#ca7b29;\">НЕУДАЧА!</span></p>");
+        ui->icon_label->setText("<img src=\":/images/warning.png\"/><br/><span style=\" font-size:36pt; font-weight:600; color:#ca7b29;\">НЕУДАЧА!</span>");
         ui->info_label->setText("<span style=\"font-size:26pt; color:#7e7e7e;\">Повторите попытку !");
-        return;
     }
     int replyNumber;
     in >> replyNumber;
@@ -134,8 +143,9 @@ void MainWindow::readSocket()
     {
     //ENTER mode
     case Replies::WIEGAND_REGISTERED:{
-        waitingGIF.stop();
-        ui->icon_label->setText("<p align=\"center\"><img src=\":/images/149_check_ok-512.png\"/><br/></p><p align=\"center\"><span style=\" font-size:36pt; font-weight:600; color:#8dc63f;\">УСПЕШНО!</span></p>");
+        ui->icon_label->setText("<img src=\":/images/149_check_ok-512.png\"/><br/><span style=\" font-size:36pt; font-weight:600; color:#8dc63f;\">УСПЕШНО!</span>");
+        ui->in_time_label->setText("");
+        ui->in_out_number_label->setText((""));
         openBareer();
         return;
     }
@@ -144,15 +154,30 @@ void MainWindow::readSocket()
         quint8 in_number;
 
         in>>in_time>>in_number;
-        ui->icon_label->setText("<p align=\"center\"><img src=\":/images/149_check_ok-512.png\"/><br/></p><p align=\"center\"><span style=\" font-size:36pt; font-weight:600; color:#8dc63f;\">УЖЕ ЗАРЕГИСТРИРОВАН!</span></p>");
-        ui->in_time_label->setText(QString("<body><p><span style=\" font-size:26pt; color:#7e7e7e;\">Время въезда : </span><span style=\" font-size:26pt; font-weight:600; color:#7e7e7e;\">%1</span></p>").arg(in_time.toString()));
-        ui->in_out_number_label->setText(QString("<body><p><span style=\" font-size:26pt; color:#7e7e7e;\">Въезд № : </span><span style=\" font-size:26pt; font-weight:600; color:#7e7e7e;\">%1</span></p>").arg(in_number));
+        ui->icon_label->setText("<img src=\":/images/warning.png\"/><br/></p><p align=\"center\"><span style=\" font-size:36pt; font-weight:600; color:#ca7b29;\">УЖЕ ЗАРЕГИСТРИРОВАН!</span>");
+        ui->in_time_label->setText(QString("<span style=\" font-size:26pt; color:#7e7e7e;\">Время въезда : </span><span style=\" font-size:26pt; font-weight:600; color:#7e7e7e;\">%1</span>").arg(in_time.toString("dd.MM.yyyy H:mm")));
+        ui->in_out_number_label->setText(QString("<span style=\" font-size:26pt; color:#7e7e7e;\">Въезд № : </span><span style=\" font-size:26pt; font-weight:600; color:#7e7e7e;\">%1</span>").arg(in_number));
         openBareer();
         return;
     }
         //EXIT mode
-    case Replies::WIEGAND_DEACTIVATED:
-    case Replies::WIEGAND_ALREADY_DEACTIVATED:{
+    case Replies::WIEGAND_IS_MONTHLY:{
+        QDateTime in_time;
+        QDateTime out_time;
+        quint8 in_number;
+
+        in>>in_time>>in_number>>out_time;
+        ui->icon_label->setText(QString("<p align=\"center\"><br/></p><p align=\"center\"><span style=\" font-size:36pt; font-weight:600; color:#8dc63f;\">Абонемент!</span></p>"));
+
+        ui->in_time_label->setText(QString("<span style=\" font-size:26pt; color:#7e7e7e;\">Время въезда : </span><span style=\" font-size:26pt; font-weight:600; color:#7e7e7e;\">%1</span>").arg(in_time.toString("dd.MM.yyyy H:mm")));
+        ui->out_time_label->setText(QString("<span style=\" font-size:26pt; color:#7e7e7e;\">Время выезда : </span><span style=\" font-size:26pt; font-weight:600; color:#7e7e7e;\">%1</span>").arg(out_time.toString("dd.MM.yyyy H:mm")));
+        ui->in_out_number_label->setText(QString("<span style=\" font-size:26pt; color:#7e7e7e;\">Въезд № : </span><span style=\" font-size:26pt; font-weight:600; color:#7e7e7e;\">%1</span>").arg(in_number));
+        openBareer();
+        return;
+    }
+
+    case Replies::WIEGAND_DEACTIVATED:{
+        qDebug()<<"deactivated";
         QDateTime in_time;
         QDateTime out_time;
         quint8 in_number;
@@ -167,46 +192,77 @@ void MainWindow::readSocket()
         int secs = (diff%3600)%60;
         QTime time(hours,minutes,secs);
 
-        ui->icon_label->setText(QString("<p align=\"center\"><span style=\" font-size:72pt;\">%1</span></p>"
-                                "<p align=\"center\"><span style=\" font-size:100pt; color:#8dc63f;\">%2 </span><span style=\" font-size:48pt; color:#b6b6b6;\">(UZS)</span></p>"
-                                "<p align=\"center\"><br/></p><p align=\"center\"><span style=\" font-size:36pt; font-weight:600; color:#8dc63f;\">ДОБРОГО ВАМ ПУТИ!</span></p>")
+        ui->icon_label->setText(QString("<p align=\"center\"><span style=\" font-size:100pt;\">%1</span></p>"
+                                        "<p align=\"center\"><span style=\" font-size:250pt; color:#ea0003;\">%2 </span><span style=\" font-size:48pt; color:#ea0003;\">(UZS)</span></p>"
+                                        "<p align=\"center\"><span style=\" font-size:50pt; font-weight:600; color:#8dc63f;\">Карта деактивирована!</span>")
                                 .arg(time.toString()).arg(price));
 
 
 
-        ui->in_time_label->setText(QString("<body><p><span style=\" font-size:26pt; color:#7e7e7e;\">Время въезда : </span><span style=\" font-size:26pt; font-weight:600; color:#7e7e7e;\">%1</span></p>").arg(in_time.toString()));
-        ui->out_time_label->setText(QString("<body><p><span style=\" font-size:26pt; color:#7e7e7e;\">Время выезда : </span><span style=\" font-size:26pt; font-weight:600; color:#7e7e7e;\">%1</span></p>").arg(out_time.toString()));
-        ui->in_out_number_label->setText(QString("<body><p><span style=\" font-size:26pt; color:#7e7e7e;\">Въезд № : </span><span style=\" font-size:26pt; font-weight:600; color:#7e7e7e;\">%1</span></p>").arg(in_number));
+        ui->in_time_label->setText(QString("<span style=\" font-size:26pt; color:#7e7e7e;\">Время въезда : </span><span style=\" font-size:26pt; font-weight:600; color:#7e7e7e;\">%1</span>").arg(in_time.toString("dd.MM.yyyy H:mm")));
+        ui->out_time_label->setText(QString("<span style=\" font-size:26pt; color:#7e7e7e;\">Время выезда : </span><span style=\" font-size:26pt; font-weight:600; color:#7e7e7e;\">%1</span>").arg(out_time.toString("dd.MM.yyyy H:mm")));
+        ui->in_out_number_label->setText(QString("<span style=\" font-size:26pt; color:#7e7e7e;\">Въезд № : </span><span style=\" font-size:26pt; font-weight:600; color:#7e7e7e;\">%1</span>").arg(in_number));
 
-        print();
+        print(time.toString(),price,in_time, out_time, in_number);
+        openBareer();
+        return;
+    }
+    case Replies::WIEGAND_ALREADY_DEACTIVATED:{
+        qDebug()<<"already deactivated";
+        QDateTime in_time;
+        QDateTime out_time;
+        quint8 in_number;
+        double price;
+
+
+        in>>in_time>>in_number>>out_time>>price;
+
+        int diff = in_time.time().secsTo(out_time.time());
+        int hours = diff/3600;
+        int minutes = (diff%3600)/60;
+        int secs = (diff%3600)%60;
+        QTime time(hours,minutes,secs);
+
+        ui->icon_label->setText(QString("<p align=\"center\"><span style=\" font-size:100pt;\">%1</span></p>"
+                                        "<p align=\"center\"><span style=\" font-size:250pt; color:#ea0003;\">%2 </span><span style=\" font-size:48pt; color:#ea0003;\">(UZS)</span></p>"
+                                        "<p align=\"center\"><span style=\" font-size:50pt; font-weight:600; color:#7e7e7e;\">Карта уже деактивирована!</span>")
+                                .arg(time.toString()).arg(price));
+
+
+        ui->in_time_label->setText(QString("<span style=\" font-size:26pt; color:#7e7e7e;\">Время въезда : </span><span style=\" font-size:26pt; font-weight:600; color:#7e7e7e;\">%1</span>").arg(in_time.toString("dd.MM.yyyy H:mm")));
+        ui->out_time_label->setText(QString("<span style=\" font-size:26pt; color:#7e7e7e;\">Время выезда : </span><span style=\" font-size:26pt; font-weight:600; color:#7e7e7e;\">%1</span>").arg(out_time.toString("dd.MM.yyyy H:mm")));
+        ui->in_out_number_label->setText(QString("<span style=\" font-size:26pt; color:#7e7e7e;\">Въезд № : </span><span style=\" font-size:26pt; font-weight:600; color:#7e7e7e;\">%1</span>").arg(in_number));
+
         openBareer();
         return;
     }
     case Replies::WIEGAND_NOT_REGISTERED:{
-        ui->icon_label->setText("<p align=\"center\"><img src=\":/images/warning.png\"/><br/></p><p align=\"center\"><span style=\" font-size:36pt; font-weight:600; color:#ca7b29;\">ОШИБКА!</span></p>");
-        ui->info_label->setText("<span style=\"font-size:26pt; color:#7e7e7e;\">Карта не зафиксирована при въезде!");
+        ui->icon_label->setText("<img src=\":/images/warning.png\"/><br/></p><p align=\"center\"><span style=\" font-size:36pt; font-weight:600; color:#ca7b29;\">ОШИБКА!</span>"
+                                "<p align=\"center\"><span style=\"font-size:26pt; color:#7e7e7e;\">Карта не зафиксирована при въезде!");
+
+        ui->in_time_label->setText("");
+        ui->out_time_label->setText("");
+        ui->in_out_number_label->setText("");
         return;
     }
         //Setting up
     case Replies::SET_UP:{
-        ui->icon_label->setText("<p align=\"center\"><img src=\":/images/149_check_ok-512.png\"/><br/></p><p align=\"center\"><span style=\" font-size:36pt; font-weight:600; color:#ca7b29;\">ПОДКЛЮЧЕНО!</span></p>");
+        ui->icon_label->setText("<img src=\":/images/149_check_ok-512.png\"/><br/><p align=\"center\"><span style=\" font-size:36pt; font-weight:600; color:#8dc63f;\">ПОДКЛЮЧЕНО!</span>");
         ui->info_label->setText("<span style=\"font-size:26pt; color:#7e7e7e;\">Приложите карту!");
         return;
     }
     case Replies::DVR_ERROR:{
-        showStatusMessage("<font color='red'>DVR Error");
-        makeDisconnection();
+        ui->icon_label->setText("<img src=\":/images/149_check_ok-512.png\"/><br/><p align=\"center\"><span style=\" font-size:36pt; font-weight:600; color:#8dc63f;\">ПОДКЛЮЧЕНО БЕЗ КАМЕРЫ!</span>");
+        ui->info_label->setText("<span style=\"font-size:26pt; color:#7e7e7e;\">Приложите карту!");
         return;
     }
-    case Replies::SNAPSHOT_FAIL:{
-        bsocket->flush();
-        ui->icon_label->setText("<p align=\"center\"><img src=\":/images/warning.png\"/><br/></p><p align=\"center\"><span style=\" font-size:36pt; font-weight:600; color:#ca7b29;\">НЕУДАЧА!</span></p>");
-        ui->info_label->setText("<span style=\"font-size:26pt; color:#7e7e7e;\">Не удалось снять на камеру!");
-        return;
-    }
-    case Replies::INVALID:
+        //    case Replies::SNAPSHOT_FAIL:{
+        //        ui->icon_label->setText("<img src=\":/images/warning.png\"/><br/><p align=\"center\"><span style=\" font-size:36pt; font-weight:600; color:#ca7b29;\">НЕУДАЧА!</span>");
+        //        ui->info_label->setText("<span style=\"font-size:26pt; color:#7e7e7e;\">Не удалось снять на камеру!");
+        //        makeDisconnection();
+        //        return;
+        //    }
     default:{
-        showStatusMessage("Undefined error!");
         makeDisconnection();
     }
     }
@@ -230,39 +286,19 @@ void MainWindow::displaySocketError(QAbstractSocket::SocketError socketError)
     makeDisconnection();
 }
 
-void MainWindow::print()
+void MainWindow::print(const QString &dur, double price, const QDateTime &in_time, const  QDateTime &out_time, const quint32 in)
 {
-    QString text = QString("-----------------------------------\n"
-                           "Tashkent Trade Center %1\n\n"
-                           "Карта: %2\n"
-                           "От:    %3\n"
-                           "До:    %4\n"
-                           "Время: %5\n"
-                           "Цена:  %6\n"
-                           "\n"
-                           "--------------------- Global Defence\n"
-                           "\n")
-            .arg(bSettings->modeSettings().bareerNumber)
-            .arg(ui->wiegand_label->text())
-            .arg(ui->enter_time_label->text())
-            .arg(ui->exit_time_label->text())
-            .arg(ui->duration_label->text())
-            .arg(ui->price_label->text());
-
-    QPainter painter;
-    painter.begin(&bPrinter);
-    painter.drawText(100, 100, 500, 500, Qt::AlignLeft|Qt::AlignTop, text);
-    painter.end();
-}
-
-void MainWindow::setWaitingState()
-{
-    if(connectingGIF.state()==QMovie::MovieState::Running)
-        connectingGIF.stop();
-
-    ui->icon_label->setMovie(&waitingGIF);
-    waitingGIF.start();
-    ui->info_label->setText("<span style=\"font-size:26pt; color:#7e7e7e;\">Приложите карту !");
+    char t[1000];
+    sprintf(t,"printf '********************************\nStroy Gorod [%02d]\n\nKarta kodi: %d\nKirish vaqti: %s\nChiqish vaqti: %s\nTurgan vaqti: %s\nPul miqdori: %.2f\nKirish #: %d\n********** powered by GSS.UZ\n\n\n\n' >/dev/usb/lp0",
+            bSettings->modeSettings().bareerNumber,
+            bWiegand,
+            in_time.toString("dd.MM.yyyy H:mm").toLatin1().data(),
+            out_time.toString("dd.MM.yyyy H:mm").toLatin1().data(),
+            dur.toLatin1().data(),
+            price,
+            in
+            );
+    system(t);
 }
 
 void MainWindow::initActionsConnections()
@@ -272,7 +308,6 @@ void MainWindow::initActionsConnections()
     connect(ui->actionAbout, &QAction::triggered, this, &MainWindow::about);
     connect(ui->actionConnect,&QAction::triggered, this, &MainWindow::makeConnection);
     connect(ui->actionDisconnect, &QAction::triggered, this, &MainWindow::makeDisconnection);
-    connect(ui->actionPrint, &QAction::triggered, this, &MainWindow::print);
 }
 
 void MainWindow::readSettings()
@@ -305,9 +340,7 @@ void MainWindow::readSettings()
 
     bSettings->setModeSettings(mode);
 
-    ui->bareer_label->setText(QString("<p><span style=\" font-size:14pt; color:#7e7e7e;\">Въезд № : "
-                                      "</span><span style=\" font-size:14pt; font-weight:600; color:#7e7e7e;\">%1</span></p>").
-                              arg(mode.bareerNumber));
+
     SettingsDialog::DVRSettings dvr;
     dvr.host = settings.value("dvr_host",QString()).toString();
     dvr.user = settings.value("dvr_user",QString()).toString();
@@ -364,4 +397,7 @@ void MainWindow::setUpServer()
         makeDisconnection();
         return;
     }
+    ui->bareer_label->setText(QString("<p><span style=\" font-size:14pt; color:#7e7e7e;\">%1 : "
+                                      "</span><span style=\" font-size:14pt; font-weight:600; color:#7e7e7e;\">%2</span></p>").arg(bSettings->modeSettings().mode?"Въезд #":"Выезд #").
+                              arg(bSettings->modeSettings().bareerNumber));
 }

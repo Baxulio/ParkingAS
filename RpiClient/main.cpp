@@ -167,12 +167,12 @@ void d1_pulse() {
 
 bool gpio_init() {
 
-    options.d0pin = D0_PIN;
-    options.d1pin = D1_PIN;
-
     if(setup_wiegand_timeout_handler()!=0)return false;
 
     if(wiringPiSetup()<0)return false;
+
+    options.d0pin = D0_PIN;
+    options.d1pin = D1_PIN;
 
     pinMode (BAREER_PIN, OUTPUT);
 
