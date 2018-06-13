@@ -28,7 +28,9 @@
 #include <QTextDocument>
 #include <QTextStream>
 
+#include <QUrl>
 #include <QDebug>
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
@@ -117,7 +119,7 @@ void MainWindow::makeDisconnection()
     bDb.closeConnection();
     ui->actionConnect->setEnabled(true);
     ui->actionDisconnect->setEnabled(false);
-    showStatusMessage("<font color='gray'>Successfully Disconnected!");
+    //showStatusMessage("<font color='gray'>Disconnected!");
 }
 
 void MainWindow::print()
@@ -173,17 +175,22 @@ void MainWindow::reloadSnapshot(const QModelIndex &index, const QModelIndex &pre
     QPixmap pix;
 
     if(ui->status_combo->currentIndex()==1){
-        path = bSettings->serverSettings().host+proxyModel->data(proxyModel->index(index.row(),3)).toString();
+        QUrl url(proxyModel->data(proxyModel->index(index.row(),3)).toString());
+
+        path = bSettings->serverSettings().host+"/"+url.fileName();
         pix.load(path);
         ui->enterSnapshot->setPixmap(pix);
     }
     else
     {
-        path = proxyModel->data(proxyModel->index(index.row(),7)).toString();
+        QUrl url(proxyModel->data(proxyModel->index(index.row(),7)).toString());
+
+        path = bSettings->serverSettings().host+"/"+url.fileName();
         pix.load(path);
         ui->enterSnapshot->setPixmap(pix);
 
-        path = proxyModel->data(proxyModel->index(index.row(),8)).toString();
+        url.setUrl(proxyModel->data(proxyModel->index(index.row(),8)).toString());
+        path = bSettings->serverSettings().host+"/"+url.fileName();
         pix.load(path);
         ui->exitSnapshot->setPixmap(pix);
     }
@@ -281,10 +288,28 @@ void MainWindow::on_status_combo_currentIndexChanged(int index)
 {
     //if(ui->actionConnect->isEnabled())return;
     if(index){
+
+        ui->out_spin->setEnabled(false);
+        ui->out_group->setEnabled(false);
+        ui->total_price_for_today_but->setVisible(false);
+        ui->filtred_pric_but->setVisible(false);
+        ui->reset_cards->setVisible(true);
+
+        ui->total_sum_label->setText("");
+        ui->archive_but->setVisible(false);
         statusModel->setTable("Active");
         proxyModel->in_col=3;
+
     }
     else {
+
+        ui->out_spin->setEnabled(true);
+        ui->out_group->setEnabled(true);
+        ui->total_price_for_today_but->setVisible(true);
+        ui->filtred_pric_but->setVisible(true);
+        ui->reset_cards->setVisible(false);
+        ui->archive_but->setVisible(true);
+
         statusModel->setTable("History");
         proxyModel->in_col=4;
     }
@@ -328,4 +353,62 @@ void MainWindow::on_priceRules_triggered()
     PriceRules priceRules(this);
     priceRules.setModal(true);
     priceRules.exec();
+}
+
+void MainWindow::on_total_price_for_today_but_clicked()
+{
+    ui->in_from_dateTime->setDateTime(QDateTime(QDate::currentDate(),QTime(0,0,0)));
+    ui->out_to_dateTime->setDateTime(QDateTime(QDate::currentDate(),QTime(23,59,59)));
+    QMessageBox::information(this,
+                             "Сегодняшняя касса",
+                             QString("%1 UZS").arg(on_filtred_pric_but_clicked()));
+}
+
+double MainWindow::on_filtred_pric_but_clicked()
+{
+    double total = 0;
+    int i=proxyModel->rowCount();
+    for (i-1; i>=0; i--){
+        total += proxyModel->data(proxyModel->index(i,5)).toDouble();
+    }
+    ui->total_sum_label->setText(QString("%1 UZS").arg(total));
+    return total;
+}
+
+void MainWindow::on_reset_cards_clicked()
+{
+    int dialog = QMessageBox::question(this,"Предупреждение", "Вы уверены отменить все не выезжанные карты?",QMessageBox::Ok | QMessageBox::Cancel);
+    if(dialog==QMessageBox::Ok){
+        statusModel->removeRows(0, statusModel->rowCount());
+        statusModel->submitAll();
+    }
+}
+
+void MainWindow::on_archive_but_clicked()
+{
+    int dialog = QMessageBox::question(this,"Предупреждение", "Вы уверены, что вы хотите архивировать историю?",QMessageBox::Ok | QMessageBox::Cancel);
+    if(dialog==QMessageBox::Ok){
+
+        QString str;
+
+        int rows = statusModel->rowCount();
+        int cols = statusModel->columnCount();
+        for (int i=0; i<rows; i++){
+            for(int j=0; j<cols; j++){
+                str += statusModel->data(statusModel->index(i,j)).toString();
+                str +=", ";
+            }
+        str+="\n";
+        }
+        QFile csvFile(QString("%1.csv").arg(QDate::currentDate().toString("dd_MM_yyyy")));
+        if(csvFile.open(QIODevice::WriteOnly | QIODevice::Truncate)){
+            QTextStream out(&csvFile);
+            out<<str;
+            csvFile.close();
+            statusModel->removeRows(0, rows);
+            statusModel->submitAll();
+        }
+    }
+
+
 }

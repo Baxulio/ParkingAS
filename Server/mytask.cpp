@@ -1,14 +1,11 @@
-// mytask.cpp
-
 #include "mytask.h"
-#include <QDebug>
-
-#include <QSqlQuery>
-#include <QSqlError>
 
 #include <netsdk.h>
 
 #include "Core.h"
+#include "DatabaseManager.h"
+#include <QVariant>
+
 //#include <QStandardPaths>
 
 // When the thread pool kicks up
@@ -25,8 +22,7 @@ MyTask::MyTask(quint32 wiegand, QString dvrip, quint8 bareerNo, bool bareerMode,
     bBareerMode(bareerMode),
     bLoginId(loginId)
 {
-    qDebug() << "MyTask()";
-    cFileName="/home/bahman/Pictures/Parking/201846_21223.jpeg";
+//    qDebug() << "MyTask()";
 }
 
 void MyTask::run()
@@ -36,8 +32,8 @@ void MyTask::run()
                   "FROM `Parking`.`Active` WHERE `Active`.`rf_id`=:rf_id;");
     query.bindValue(":rf_id",bWiegand);
     if(!query.exec()){
+        DatabaseManager::debugQuery(query);
         emit Result(Replies::INVALID);
-        qDebug()<<query.lastError().text();
         return;
     }
     query.next();
@@ -52,10 +48,11 @@ void MyTask::run()
                         query.value("in_number").toUInt());
             return;
         }
-//        if(!snapshot(b_out_time)){
-//            emit Result(Replies::SNAPSHOT_FAIL);
-//            return;
-//        }
+        if(!snapshot(b_out_time)){
+            cFileName="";
+            //            emit Result(Replies::SNAPSHOT_FAIL);
+            //            return;
+        }
 
         query.prepare("INSERT INTO `Parking`.`Active`(`rf_id`, `in_time`, `in_number`, `img`) "
                       "VALUES(:b_rf_id,:b_in_time,:b_in_number,:b_img);");
@@ -65,8 +62,8 @@ void MyTask::run()
         query.bindValue(":b_img", cFileName);
 
         if(!query.exec()){
+            DatabaseManager::debugQuery(query);
             emit Result(Replies::INVALID);
-            qDebug()<<query.lastError().text();
             return;
         }
 
@@ -76,11 +73,13 @@ void MyTask::run()
     /////EXIT
     else {
         if(!query.isValid()){
-            if(!query.exec("SELECT in_time, in_number, out_time, price "
-                           "FROM History "
-                           "WHERE out_time >= DATE_SUB(NOW() , INTERVAL 1 MINUTE)")){
+            query.prepare("SELECT in_time, in_number, out_time, price "
+                          "FROM History "
+                          "WHERE out_time >= DATE_SUB(NOW() , INTERVAL 1 MINUTE) AND rf_id=:wiegand LIMIT 1");
+            query.bindValue(":wiegand",bWiegand);
+            if(!query.exec()){
+                DatabaseManager::debugQuery(query);
                 emit Result(Replies::INVALID);
-                qDebug()<<query.lastError().text();
                 return;
             }
             query.next();
@@ -96,17 +95,18 @@ void MyTask::run()
             return;
         }
 
-//        if(!snapshot(b_out_time)){
-//            emit Result(Replies::SNAPSHOT_FAIL);
-//            return;
-//        }
+        if(!snapshot(b_out_time)){
+            cFileName="";
+            //            emit Result(Replies::SNAPSHOT_FAIL);
+            //            return;
+        }
 
         int b_id = query.value("id").toInt();
         QDateTime b_in_time = query.value("in_time").toDateTime();
         quint8 b_in_number = query.value("in_number").toUInt();
         QString b_img = query.value("img").toString();
 
-        query.prepare("SELECT Price.price_formula, Cards.last_period FROM Price INNER JOIN Cards ON Price.id = Cards.id WHERE Cards.code = :b_wiegand");
+        query.prepare("SELECT Price.price_formula, Cards.subscription FROM Price INNER JOIN Cards ON Price.id = Cards.priceId WHERE Cards.code = :b_wiegand");
         query.bindValue(":b_wiegand", bWiegand);
         query.exec();
         query.next();
@@ -114,7 +114,7 @@ void MyTask::run()
             query.exec("SELECT price_formula FROM Price WHERE car_type = 'Другое'");
             query.next();
         }
-        else if(query.value("last_period").isNull()){
+        else if(query.value("subscription").toBool()){
             emit Result(Replies::WIEGAND_IS_MONTHLY,b_in_time,b_in_number,b_out_time);
             return;
         }
@@ -146,8 +146,8 @@ void MyTask::run()
         /// END MOVE TO HISTORY ///////
         /// ///////////////////////////
         if(!QSqlDatabase::database().commit()){
+            DatabaseManager::debugQuery(query);
             emit Result(Replies::INVALID);
-            qDebug()<<query.lastError().text();
             return;
         }
         emit Result(Replies::WIEGAND_DEACTIVATED,b_in_time,b_in_number,b_out_time,price);
@@ -156,8 +156,8 @@ void MyTask::run()
 
 bool MyTask::snapshot(const QDateTime &time)
 {
-    QString fileName = /*QStandardPaths::writableLocation(QStandardPaths::PicturesLocation)*/
-            QString("/home/bahman/Pictures/Parking/%1%2%3_%4%5%6_%7.jpeg")
+    QString fileName = /*QStandardPaths::writableLocation(QStandardPaths::PicturesLocation)+*/
+            QString("/home/gss/Pictures/Parking/%1%2%3_%4%5%6_%7.jpeg")
             .arg(time.date().year())
             .arg(time.date().month())
             .arg(time.date().day())
@@ -166,9 +166,7 @@ bool MyTask::snapshot(const QDateTime &time)
             .arg(time.time().second())
             .arg(bBareerNo);
 
-    QByteArray ba = fileName.toLatin1();
-    cFileName = ba.data();
-
+    cFileName=fileName.toLatin1().data();
     return H264_DVR_CatchPic(bLoginId,0,cFileName);
 }
 

@@ -1,12 +1,12 @@
 #include <QCoreApplication>
-#include "myserver.h"
+
 #include "DatabaseManager.h"
-#include <QSqlError>
+#include "myserver.h"
 
 const QString DATABASE = "Parking";
 const QString HOST = "localhost";
-const QString USER = "Parking";
-const QString PASSWORD = "";
+const QString USER = "Server";
+const QString PASSWORD = "gss2018";
 const int PORT = 3306;
 
 int main(int argc, char *argv[])

@@ -1,6 +1,5 @@
-// myserver.cpp
-
 #include "myserver.h"
+#include "myclient.h"
 
 MyServer::MyServer(QObject *parent) :
     QTcpServer(parent)
