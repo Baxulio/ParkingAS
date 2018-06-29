@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1085</width>
-    <height>1047</height>
+    <width>977</width>
+    <height>762</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -116,7 +116,10 @@
        </font>
       </property>
       <property name="text">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;img src=&quot;:/images/warning.png&quot;/&gt;&lt;br/&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:36pt; font-weight:600; color:#ca7b29;&quot;&gt;НЕТ ПОДКЛЮЧЕНИЯ!&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;img src=&quot;:/images/warning.png&quot;/&gt;&lt;br/&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:36pt; font-weight:600; color:#ea0003;&quot;&gt;НЕТ ПОДКЛЮЧЕНИЯ!&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
       </property>
      </widget>
     </item>
@@ -267,8 +270,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1085</width>
-     <height>21</height>
+     <width>977</width>
+     <height>19</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuCalls">
@@ -278,7 +281,6 @@
     <addaction name="actionConnect"/>
     <addaction name="actionDisconnect"/>
     <addaction name="separator"/>
-    <addaction name="actionPrint"/>
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
@@ -311,8 +313,6 @@
    </attribute>
    <addaction name="actionConnect"/>
    <addaction name="actionDisconnect"/>
-   <addaction name="separator"/>
-   <addaction name="actionPrint"/>
    <addaction name="separator"/>
    <addaction name="actionConfigure"/>
   </widget>
@@ -379,18 +379,6 @@
   <action name="actionAbout">
    <property name="text">
     <string>&amp;About</string>
-   </property>
-  </action>
-  <action name="actionPrint">
-   <property name="icon">
-    <iconset resource="rpiclientresources.qrc">
-     <normaloff>:/images/Cheque.png</normaloff>:/images/Cheque.png</iconset>
-   </property>
-   <property name="text">
-    <string>&amp;Print</string>
-   </property>
-   <property name="toolTip">
-    <string>Prints cheque</string>
    </property>
   </action>
  </widget>

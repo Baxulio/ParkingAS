@@ -12,7 +12,6 @@
 
 #include <QLabel>
 #include <QTimer>
-#include <QMovie>
 
 namespace Ui {
 class MainWindow;
@@ -30,10 +29,10 @@ private:
 
     QPrinter bPrinter;
     QLabel *label;
-    QTimer timer;
 
-    QMovie connectingGIF;
-    QMovie waitingGIF;
+    quint32 bWiegand;
+    quint32 bTimer;
+    QTimer timer;
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
@@ -50,7 +49,7 @@ private slots:
     void readSocket();
     void displaySocketError(QAbstractSocket::SocketError socketError);
 
-    void print();
+    void print(const QString &dur, double price, const QDateTime &in_time, const QDateTime &out_time, const quint32 in);
 
 public slots:
     void wiegandCallback(quint32 value);
