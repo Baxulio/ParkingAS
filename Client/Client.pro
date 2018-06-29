@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui printsupport sql
+QT       += core gui printsupport sql network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -30,7 +30,9 @@ SOURCES += \
     ProxyModel.cpp \
     PriceRules.cpp \
     DateDelegate.cpp \
-    SubscriptionDelegate.cpp
+    SubscriptionDelegate.cpp \
+    FileDownloader.cpp \
+    PasswordDialog.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -38,12 +40,15 @@ HEADERS += \
     ProxyModel.h \
     PriceRules.h \
     DateDelegate.h \
-    SubscriptionDelegate.h
+    SubscriptionDelegate.h \
+    FileDownloader.h \
+    PasswordDialog.h
 
 FORMS += \
         mainwindow.ui \
     SettingsDialog.ui \
-    PriceRules.ui
+    PriceRules.ui \
+    PasswordDialog.ui
 
 RESOURCES += \
     clientresources.qrc

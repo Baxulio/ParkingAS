@@ -19,6 +19,14 @@ public:
     void setFilterOut_Time_To(const QDateTime &time);
     void setHeaders();
 
+    void setRf_id(const quint32 &id){rf_id=id;}
+    void setIn(const quint8 &inGate){in=inGate;}
+    void setOut(const quint8 &outGate){out=outGate;}
+    void setIn_Time_From(const QDateTime &time){in_time_from=time;}
+    void setIn_Time_To(const QDateTime &time){in_time_to=time;}
+    void setOut_Time_From(const QDateTime &time){out_time_from=time;}
+    void setOut_Time_To(const QDateTime &time){out_time_to=time;}
+    void invalidateFilterByMyself(){this->invalidateFilter();}
     int in_col;
     // QSortFilterProxyModel interface
 protected:

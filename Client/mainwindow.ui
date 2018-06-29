@@ -119,17 +119,6 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="total_price_for_today_but">
-        <property name="text">
-         <string>Сегодняшняя касса</string>
-        </property>
-        <property name="icon">
-         <iconset resource="clientresources.qrc">
-          <normaloff>:/images/money.png</normaloff>:/images/money.png</iconset>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QPushButton" name="show_advanced_button">
         <property name="text">
          <string>Больше ...</string>
@@ -169,13 +158,13 @@
           </spacer>
          </item>
          <item>
-          <widget class="QPushButton" name="clear_button">
+          <widget class="QPushButton" name="total_price_for_today_but">
            <property name="text">
-            <string>Очистить Фильтр</string>
+            <string>Отфильтровать на сегодня</string>
            </property>
            <property name="icon">
             <iconset resource="clientresources.qrc">
-             <normaloff>:/images/clear.png</normaloff>:/images/clear.png</iconset>
+             <normaloff>:/images/money.png</normaloff>:/images/money.png</iconset>
            </property>
           </widget>
          </item>
@@ -466,6 +455,41 @@
          </item>
         </layout>
        </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_9">
+         <item>
+          <spacer name="horizontalSpacer_3">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>717</width>
+             <height>17</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="clear_button">
+           <property name="text">
+            <string>Очистить Фильтр</string>
+           </property>
+           <property name="icon">
+            <iconset resource="clientresources.qrc">
+             <normaloff>:/images/clear.png</normaloff>:/images/clear.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="filterButton">
+           <property name="text">
+            <string>Фильтровать -&gt;</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
       </layout>
      </widget>
     </item>
@@ -475,7 +499,7 @@
        <enum>QAbstractScrollArea::AdjustIgnored</enum>
       </property>
       <property name="editTriggers">
-       <set>QAbstractItemView::DoubleClicked</set>
+       <set>QAbstractItemView::AnyKeyPressed|QAbstractItemView::DoubleClicked</set>
       </property>
       <property name="showDropIndicator" stdset="0">
        <bool>false</bool>
@@ -487,7 +511,7 @@
        <bool>true</bool>
       </property>
       <property name="selectionMode">
-       <enum>QAbstractItemView::SingleSelection</enum>
+       <enum>QAbstractItemView::ContiguousSelection</enum>
       </property>
       <property name="selectionBehavior">
        <enum>QAbstractItemView::SelectRows</enum>
@@ -504,22 +528,46 @@
      </widget>
     </item>
     <item>
-     <widget class="QLabel" name="total_sum_label">
-      <property name="font">
-       <font>
-        <pointsize>12</pointsize>
-       </font>
+     <layout class="QHBoxLayout" name="horizontalLayout_8">
+      <property name="bottomMargin">
+       <number>5</number>
       </property>
-      <property name="styleSheet">
-       <string notr="true">color: rgb(255, 47, 47);</string>
-      </property>
-      <property name="text">
-       <string>Нажмите на &quot;Показать отфильтрованную цену&quot;, чтобы увидеть отфильтрованную сумму!</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-      </property>
-     </widget>
+      <item>
+       <widget class="QPushButton" name="selected_price">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Показать выделенныую сумму</string>
+        </property>
+        <property name="icon">
+         <iconset resource="clientresources.qrc">
+          <normaloff>:/images/money.png</normaloff>:/images/money.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="total_sum_label">
+        <property name="font">
+         <font>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">color: rgb(255, 47, 47);</string>
+        </property>
+        <property name="text">
+         <string>Нажмите на &quot;Показать отфильтрованную цену&quot;, чтобы увидеть отфильтрованную сумму!</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>
@@ -529,7 +577,7 @@
      <x>0</x>
      <y>0</y>
      <width>1142</width>
-     <height>25</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuCalls">
@@ -595,6 +643,12 @@
        <property name="text">
         <string/>
        </property>
+       <property name="scaledContents">
+        <bool>true</bool>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
       </widget>
      </item>
      <item>
@@ -608,6 +662,12 @@
       <widget class="QLabel" name="exitSnapshot">
        <property name="text">
         <string/>
+       </property>
+       <property name="scaledContents">
+        <bool>true</bool>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
        </property>
       </widget>
      </item>

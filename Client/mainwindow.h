@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 #include <DatabaseManager.h>
-
+#include <QPixmap>
 namespace Ui {
 class MainWindow;
 }
@@ -15,6 +15,7 @@ class ProxyModel;
 class QSqlTableModel;
 
 class MainWindow : public QMainWindow
+
 {
     Q_OBJECT
 private:
@@ -25,14 +26,17 @@ private:
     SettingsDialog *bSettings;
     QSqlTableModel *statusModel;
     ProxyModel *proxyModel;
-
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
     // QWidget interface
 protected:
-    void closeEvent(QCloseEvent *event) override;
+    void closeEvent(QCloseEvent *event) override;    
+
+    // QWidget interface
+protected:
+    void keyPressEvent(QKeyEvent *event) override;
 
 private slots:
     void about();
@@ -43,21 +47,21 @@ private slots:
     void print();
     void reloadSnapshot(const QModelIndex &index, const QModelIndex &prev);
 
-    void on_in_from_dateTime_dateTimeChanged(const QDateTime &dateTime);
-
-    void on_wiegand_id_spin_valueChanged(int arg1);
-
-    void on_in_to_dateTime_dateTimeChanged(const QDateTime &dateTime);
-
-    void on_out_to_dateTime_dateTimeChanged(const QDateTime &dateTime);
-
-    void on_in_spin_valueChanged(int arg1);
-
-    void on_out_spin_valueChanged(int arg1);
-
     void on_status_combo_currentIndexChanged(int index);
 
-    void on_out_from_dateTime_dateTimeChanged(const QDateTime &dateTime);
+//    void on_in_from_dateTime_dateTimeChanged(const QDateTime &dateTime);
+
+//    void on_wiegand_id_spin_valueChanged(int arg1);
+
+//    void on_in_to_dateTime_dateTimeChanged(const QDateTime &dateTime);
+
+//    void on_out_to_dateTime_dateTimeChanged(const QDateTime &dateTime);
+
+//    void on_in_spin_valueChanged(int arg1);
+
+//    void on_out_spin_valueChanged(int arg1);
+
+//    void on_out_from_dateTime_dateTimeChanged(const QDateTime &dateTime);
 
     void on_clear_button_clicked();
 
@@ -73,12 +77,18 @@ private slots:
 
     void on_archive_but_clicked();
 
+    void on_selected_price_clicked();
+
+    void on_filterButton_clicked();
+
 private:
     void initActionsConnections();
 
     void readSettings();
     void writeSettings();
     void updateTable();
+
+
 };
 
 #endif // MAINWINDOW_H
